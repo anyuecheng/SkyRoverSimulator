@@ -1,0 +1,39 @@
+# Extension configuration file.
+# Visit the "Extension configuration file (extension.toml)" section for more details:
+# https://docs.omniverse.nvidia.com/kit/docs/kit-manual/latest/guide/extensions_advanced.html
+#
+
+[core]
+reloadable = true
+order = 0
+
+[package]
+version = "0.1.0"
+category = "simulation"
+title = "SkyRover Simulator"
+description = "Extension providing the main framework interfaces for simulating aerial-ground vehicles"
+authors = ["Fei Wang <feiwang@dlmu.edu.cn>"]
+keywords = ["air-ground","quadrotor","rover","UAV","UGV","px4","robotics"]
+changelog = "docs/CHANGELOG.md"
+readme = "docs/README.md"
+preview_image = "data/preview.png"
+icon = "data/icon.png"
+
+[dependencies]
+"omni.ui" = {}
+"omni.usd" = {}
+"omni.kit.uiapp" = {}
+"omni.isaac.core" = {}
+"omni.ui.scene" = {}
+"omni.kit.window.viewport" = {}
+"isaacsim.replicator.agent.core" = {}
+"omni.graph" = {}
+"omni.graph.tools" = {}
+
+# define the Python module that the extension provides
+[[python.module]]
+name = "skyrover.simulator"
+
+[settings]
+exts."skyrover.simulator".timeout = 5
+
