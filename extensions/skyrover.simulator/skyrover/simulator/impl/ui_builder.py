@@ -64,6 +64,10 @@ class SkyRoverWindow(ui.Window):
         # Bind the UI delegate to this window
         self._handler.set_window_bind(self)
 
+        # Auxiliar attributes for getting the transforms of the vehicle and the camera from the UI
+        self._camera_transform_models = []
+        # self._vehicle_transform_models = []
+
         # Build the actual window UI
         self._build_ui()
 

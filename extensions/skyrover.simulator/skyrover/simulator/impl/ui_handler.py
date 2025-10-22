@@ -6,6 +6,7 @@
 
 # External packages
 import os
+import gc
 import asyncio
 from scipy.spatial.transform import Rotation
 

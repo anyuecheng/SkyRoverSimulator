@@ -337,15 +337,15 @@ class SkyRoverInterface:
             raise Exception("The usd asset" + usd_asset + "is not load at stage path " + stage_prefix)
         
 
-    def set_viewport_camera(self, camera_position, camera_target):
+    def set_viewport_camera(self, eye, target):
         """Sets the viewport camera to given position and makes it point to another target position.
 
         Args:
-            camera_position (list): A list with [X, Y, Z] coordinates of the camera in ENU inertial frame.
-            camera_target (list): A list with [X, Y, Z] coordinates of the target that the camera should point to in the ENU inertial frame.
+            eye (list): A list with [X, Y, Z] coordinates of the camera in ENU inertial frame.
+            target (list): A list with [X, Y, Z] coordinates of the target that the camera should point to in the ENU inertial frame.
         """
         # Set the camera view to a fixed value
-        set_camera_view(eye=camera_position, target=camera_target)
+        set_camera_view(eye=eye, target=target)
 
 
     def set_world_settings(self, physics_dt=None, stage_units_in_meters=None, rendering_dt=None, device=None):
