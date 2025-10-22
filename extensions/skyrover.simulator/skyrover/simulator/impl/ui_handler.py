@@ -14,8 +14,8 @@ import carb
 import omni.ui as ui
 
 # Extension Configurations
-from skyrover.simulator.impl.params import SIMULATION_ENVIRONMENTS
-# from pegasus.simulator.logic.interface.pegasus_interface import PegasusInterface
+from skyrover.simulator.impl.params import SIMULATION_ENVIRONMENTS, WORLD_SETTINGS, BACKENDS
+from skyrover.simulator.core.interface.skyrover_interface import SkyRoverInterface
 
 # # Vehicle Manager to spawn Vehicles
 # from pegasus.simulator.logic.backends import Backend, BackendConfig, PX4MavlinkBackend, PX4MavlinkBackendConfig, ArduPilotMavlinkBackend, ArduPilotMavlinkBackendConfig
@@ -41,8 +41,8 @@ class UIHandler:
         # The window that will be bound to this delegate
         self._window = None
 
-#         # Get an instance of the pegasus simulator
-#         self._pegasus_sim: PegasusInterface = PegasusInterface()
+        # Get an instance of the skyrover simulator
+        self._skyrover_sim: SkyRoverInterface = SkyRoverInterface()
 
         # Attribute that holds the currently selected scene from the dropdown menu
         self._scene_dropdown: ui.AbstractItemModel = None
@@ -50,14 +50,11 @@ class UIHandler:
 
         # Selected latitude, longitude and altitude
         self._latitude_field: ui.AbstractValueModel = None
-        # self._latitude = PegasusInterface().latitude
-        self._latitude = 39.904202
+        self._latitude = SkyRoverInterface().latitude
         self._longitude_field: ui.AbstractValueModel = None
-        # self._longitude = PegasusInterface().longitude
-        self._longitude = 116.407394
+        self._longitude = SkyRoverInterface().longitude
         self._altitude_field: ui.AbstractValueModel = None
-        # self._altitude = PegasusInterface().altitude
-        self._altitude = 50.0
+        self._altitude = SkyRoverInterface().altitude
 
 #         # Attribute that hold the currently selected vehicle from the dropdown menu
 #         self._vehicle_dropdown: ui.AbstractItemModel = None
@@ -66,9 +63,9 @@ class UIHandler:
 #         # Get an instance of the vehicle manager
 #         self._vehicle_manager = VehicleManager()
 
-#         # Selected option for broadcasting the simulated vehicle (PX4+ROS2 or just ROS2)
-#         # By default we assume PX4
-#         self._streaming_backend: str = BACKENDS['px4']
+        # Selected option for broadcasting the simulated vehicle (PX4+ROS2 or just ROS2)
+        # By default we assume PX4
+        self._streaming_backend: str = BACKENDS['px4']
 
 #         # Selected value for the the id of the vehicle
 #         self._vehicle_id_field: ui.AbstractValueModel = None
@@ -119,8 +116,8 @@ class UIHandler:
 #     def set_vehicle_id_field(self, vehicle_id_field: ui.AbstractValueModel):
 #         self._vehicle_id_field = vehicle_id_field
 
-#     def set_streaming_backend(self, backend: str = BACKENDS['px4']):
-#         self._streaming_backend = backend
+    def set_streaming_backend(self, backend: str = BACKENDS['px4']):
+        self._streaming_backend = backend
 
 #     def set_px4_autostart_checkbox(self, checkbox_model:ui.AbstractValueModel):
 #         self._px4_autostart_checkbox = checkbox_model
@@ -147,34 +144,22 @@ class UIHandler:
 #     """
 
     def on_set_new_global_coordinates(self):
-        # self._pegasus_sim.set_global_coordinates(
-        #     self._latitude_field.get_value_as_float(),
-        #     self._longitude_field.get_value_as_float(),
-        #     self._altitude_field.get_value_as_float())
-        print(
+        self._skyrover_sim.set_global_coordinates(
             self._latitude_field.get_value_as_float(),
             self._longitude_field.get_value_as_float(),
             self._altitude_field.get_value_as_float())
         
 
     def on_reset_global_coordinates(self):
-        # self._pegasus_sim.set_default_global_coordinates()
+        self._skyrover_sim.set_default_global_coordinates()
 
-        # self._latitude_field.set_value(self._pegasus_sim.latitude)
-        # self._longitude_field.set_value(self._pegasus_sim.longitude)
-        # self._altitude_field.set_value(self._pegasus_sim.altitude)
-        self._latitude_field.set_value(39.904202)
-        self._longitude_field.set_value(116.407394)
-        self._altitude_field.set_value(100.0)
+        self._latitude_field.set_value(self._skyrover_sim.latitude)
+        self._longitude_field.set_value(self._skyrover_sim.longitude)
+        self._altitude_field.set_value(self._skyrover_sim.altitude)
 
 
     def on_set_new_default_global_coordinates(self):
-        # self._pegasus_sim.set_new_default_global_coordinates(
-        #     self._latitude_field.get_value_as_float(),
-        #     self._longitude_field.get_value_as_float(),
-        #     self._altitude_field.get_value_as_float()
-        # )
-        print(
+        self._skyrover_sim.set_new_default_global_coordinates(
             self._latitude_field.get_value_as_float(),
             self._longitude_field.get_value_as_float(),
             self._altitude_field.get_value_as_float()
@@ -192,8 +177,8 @@ class UIHandler:
             selected_world = self._scene_names[environemnt_index]
             
             # Try to spawn the selected world
-            # self._pegasus_sim.set_world_settings(**WORLD_SETTINGS[self._streaming_backend])
-            # asyncio.ensure_future(self._pegasus_sim.load_environment_async(SIMULATION_ENVIRONMENTS[selected_world], force_clear=True))
+            self._skyrover_sim.set_world_settings(**WORLD_SETTINGS[self._streaming_backend])
+            asyncio.ensure_future(self._skyrover_sim.load_environment_async(SIMULATION_ENVIRONMENTS[selected_world], force_clear=True))
             print("Loading scene: " + selected_world + " from path: " + SIMULATION_ENVIRONMENTS[selected_world])
 
 
@@ -201,7 +186,7 @@ class UIHandler:
         """
         Method that should be invoked when the clear world button is pressed
         """
-        # self._pegasus_sim.clear_scene()
+        self._skyrover_sim.clear_scene()
         print("Scene cleared.")
 
 #     def on_load_vehicle(self):
@@ -314,21 +299,21 @@ class UIHandler:
 #         # Run the actual vehicle spawn async so that the UI does not freeze
 #         asyncio.ensure_future(async_load_vehicle())        
 
-#     def on_set_viewport_camera(self):
-#         """
-#         Method that should be invoked when the button to set the viewport camera pose is pressed
-#         """
-#         carb.log_warn("The viewport camera pose has been adjusted")
+    def on_set_viewport_camera(self):
+        """
+        Method that should be invoked when the button to set the viewport camera pose is pressed
+        """
+        carb.log_warn("The viewport camera pose has been adjusted")
 
-#         if self._window:
+        if self._window:
 
-#             # Get the current camera position value
-#             camera_position, camera_target = self._window.get_selected_camera_pos()
+            # Get the current camera position value
+            camera_position, camera_target = self._window.get_selected_camera_pos()
 
-#             if camera_position is not None and camera_target is not None:
+            if camera_position is not None and camera_target is not None:
 
-#                 # Set the camera view to a fixed value
-#                 self._pegasus_sim.set_viewport_camera(eye=camera_position, target=camera_target)
+                # Set the camera view to a fixed value
+                self._skyrover_sim.set_viewport_camera(eye=camera_position, target=camera_target)
     
 #     def on_set_new_default_px4_path(self):
 #         """

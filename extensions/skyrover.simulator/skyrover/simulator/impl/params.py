@@ -19,9 +19,6 @@ MENU_PATH = "Window/" + WINDOW_TITLE
 EXTENSION_FOLDER_PATH = Path(os.path.dirname(os.path.realpath(__file__)))
 ROOT = str(EXTENSION_FOLDER_PATH.parent.parent.parent.parent.resolve())
 
-# # Get the configurations file path
-# CONFIG_FILE = ROOT + "/pegasus.simulator/config/configs.yaml"
-
 # Define the Extension Assets Path
 ASSET_PATH = ROOT + "/skyrover.simulator/skyrover/simulator/assets"
 ROBOTS_ASSETS = ASSET_PATH + "/Robots"
@@ -66,34 +63,37 @@ for asset in NVIDIA_SIMULATION_ENVIRONMENTS:
 # for asset in OMNIVERSE_ENVIRONMENTS:
 #     SIMULATION_ENVIRONMENTS[asset] = OMNIVERSE_ENVIRONMENTS[asset]
 
-# BACKENDS = {
-#     "px4": "px4",
-#     "ardupilot": "ardupilot",
-#     "ros2": "ros2"
-# }
+BACKENDS = {
+    "px4": "px4",
+    "ardupilot": "ardupilot",
+    "ros2": "ros2"
+}
 
-# # Define the default settings for the simulation environment
-# WORLD_SETTINGS = {
-#     'px4': {
-#         "physics_dt": 1.0 / 250.0,
-#         "stage_units_in_meters": 1.0,
-#         "rendering_dt": 1.0 / 60.0,
-#         "device": "cpu"
-#     },
-#     'ardupilot': {
-#         "physics_dt": 1.0 / 800.0, # Reach communication of 250hz with ardupilot sitl
-#         "stage_units_in_meters": 1.0,
-#         "rendering_dt": 1.0 / 100.0,
-#         "device": "cpu"
-#     },
-#     'ros2': {
-#         "physics_dt": 1.0 / 250.0,
-#         "stage_units_in_meters": 1.0,
-#         "rendering_dt": 1.0 / 60.0,
-#         "device": "cpu"
-#     }
-# }
-# DEFAULT_WORLD_SETTINGS = WORLD_SETTINGS['px4']
+# Define the default settings for the simulation environment
+WORLD_SETTINGS = {
+    'px4': {
+        "physics_dt": 1.0 / 250.0,
+        "stage_units_in_meters": 1.0,
+        "rendering_dt": 1.0 / 60.0,
+        "device": "cpu"
+    },
+    'ardupilot': {
+        "physics_dt": 1.0 / 800.0, # Reach communication of 250hz with ardupilot sitl
+        "stage_units_in_meters": 1.0,
+        "rendering_dt": 1.0 / 100.0,
+        "device": "cpu"
+    },
+    'ros2': {
+        "physics_dt": 1.0 / 250.0,
+        "stage_units_in_meters": 1.0,
+        "rendering_dt": 1.0 / 60.0,
+        "device": "cpu"
+    }
+}
+DEFAULT_WORLD_SETTINGS = WORLD_SETTINGS['px4']
+
+# Get the configurations file path
+CONFIG_FILE = ROOT + "/skyrover.simulator/config/configs.yaml"
 
 # Define where the thumbnail of the vehicle is located
 # THUMBNAIL = ROBOTS_ASSETS + "/Iris/iris_thumbnail.png"

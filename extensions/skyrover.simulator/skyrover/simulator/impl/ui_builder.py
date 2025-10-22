@@ -12,6 +12,8 @@ Isaac Sim UI Utilities extension:
   https://docs.omniverse.nvidia.com/py/isaacsim/source/extensions/omni.isaac.ui/docs/index.html
 """
 
+import numpy as np
+
 import omni.kit.ui
 import omni.ui as ui
 from omni.ui import color as cl
@@ -94,9 +96,9 @@ class SkyRoverWindow(ui.Window):
                     # self._robot_selection_frame()
                     # ui.Spacer(height=5)
 
-                    # # Create a frame for selecting the camera position, and what it should point torwards to
-                    # self._viewport_camera_frame()
-                    # ui.Spacer()
+                    # Create a frame for selecting the camera position, and what it should point torwards to
+                    self._viewport_camera_frame()
+                    ui.Spacer()
 
                     self._button = ui.Button("Click me", clicked_fn=lambda: print("Button clicked"))
 
@@ -187,5 +189,92 @@ class SkyRoverWindow(ui.Window):
                             style=SkyRoverWindow.BUTTON_BASE_STYLE,
                         )
 
-                
 
+    def _viewport_camera_frame(self):
+        all_axis = ["X", "Y", "Z"]
+        colors = {"X": 0xFF5555AA, "Y": 0xFF76A371, "Z": 0xFFA07D4F}
+        default_values = [5.0, 5.0, 5.0]
+        target_default_values = [0.0, 0.0, 0.0]
+
+        # Frame for setting the camera to visualize the vehicle in the simulator viewport
+        with ui.CollapsableFrame("Viewport Camera"):
+            with ui.VStack(spacing=8):
+                ui.Spacer(height=0)
+
+                # Iterate over the position and rotation menus
+                with ui.HStack():
+                    with ui.HStack():
+                        ui.Label("Position", name="transform", width=50, height=20)
+                        ui.Spacer()
+                    # Fields X, Y and Z
+                    for axis, default_value in zip(all_axis, default_values):
+                        with ui.HStack():
+                            with ui.ZStack(width=15):
+                                ui.Rectangle(
+                                    width=15,
+                                    height=20,
+                                    style={
+                                        "background_color": colors[axis],
+                                        "border_radius": 3,
+                                        "corner_flag": ui.CornerFlag.LEFT,
+                                    },
+                                )
+                                ui.Label(axis, height=20, name="transform_label", alignment=ui.Alignment.CENTER)
+                            float_drag = ui.FloatDrag(name="transform", min=-1000000, max=1000000, step=0.01)
+                            float_drag.model.set_value(default_value)
+                            # Save the model of each FloatDrag such that we can access its values later on
+                            self._camera_transform_models.append(float_drag.model)
+                            ui.Circle(
+                                name="transform", width=20, height=20, radius=3.5, size_policy=ui.CircleSizePolicy.FIXED
+                            )
+
+                # Iterate over the position and rotation menus
+                with ui.HStack():
+                    with ui.HStack():
+                        ui.Label("Target", name="transform", width=50, height=20)
+                        ui.Spacer()
+                    # Fields X, Y and Z
+                    for axis, default_value in zip(all_axis, target_default_values):
+                        with ui.HStack():
+                            with ui.ZStack(width=15):
+                                ui.Rectangle(
+                                    width=15,
+                                    height=20,
+                                    style={
+                                        "background_color": colors[axis],
+                                        "border_radius": 3,
+                                        "corner_flag": ui.CornerFlag.LEFT,
+                                    },
+                                )
+                                ui.Label(axis, height=20, name="transform_label", alignment=ui.Alignment.CENTER)
+                            float_drag = ui.FloatDrag(name="transform", min=-1000000, max=1000000, step=0.01)
+                            float_drag.model.set_value(default_value)
+                            # Save the model of each FloatDrag such that we can access its values later on
+                            self._camera_transform_models.append(float_drag.model)
+                            ui.Circle(
+                                name="transform", width=20, height=20, radius=3.5, size_policy=ui.CircleSizePolicy.FIXED
+                            )
+
+                # Button to set the camera view
+                ui.Button(
+                    "Set Camera Pose",
+                    height=SkyRoverWindow.BUTTON_HEIGHT,
+                    clicked_fn=self._handler.on_set_viewport_camera,
+                    style=SkyRoverWindow.BUTTON_BASE_STYLE,
+                )
+                ui.Spacer()
+
+
+    def get_selected_camera_pos(self):
+        """
+        Method that returns the currently selected camera position in the camera transform widget
+        """
+
+        # Extract the camera desired position and the target it is pointing to
+        if len(self._camera_transform_models) == 6:
+            camera_pos = np.array([self._camera_transform_models[i].get_value_as_float() for i in range(3)])
+            camera_target = np.array([self._camera_transform_models[i].get_value_as_float() for i in range(3, 6)])
+            return camera_pos, camera_target
+
+        return None, None
+    
