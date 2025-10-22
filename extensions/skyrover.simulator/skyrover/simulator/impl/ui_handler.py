@@ -111,11 +111,17 @@ class UIHandler:
     def set_altitude_field(self, altitude_model: ui.AbstractValueModel):
         self._altitude_field = altitude_model
 
-#     def set_vehicle_dropdown(self, vehicle_dropdown_model: ui.AbstractItemModel):
-#         self._vehicle_dropdown = vehicle_dropdown_model
+    def set_aerial_vehicle_dropdown(self, vehicle_dropdown_model: ui.AbstractItemModel):
+        self._aerial_vehicle_dropdown = vehicle_dropdown_model
 
-#     def set_vehicle_id_field(self, vehicle_id_field: ui.AbstractValueModel):
-#         self._vehicle_id_field = vehicle_id_field
+    def set_aerial_vehicle_num_field(self, vehicle_num_field: ui.AbstractValueModel):
+        self._aerial_vehicle_num_field = vehicle_num_field
+
+    def set_ground_vehicle_dropdown(self, vehicle_dropdown_model: ui.AbstractItemModel):
+        self._ground_vehicle_dropdown = vehicle_dropdown_model
+
+    def set_ground_vehicle_num_field(self, vehicle_num_field: ui.AbstractValueModel):
+        self._ground_vehicle_num_field = vehicle_num_field
 
     def set_streaming_backend(self, backend: str = BACKENDS['px4']):
         self._streaming_backend = backend
@@ -190,10 +196,12 @@ class UIHandler:
         self._skyrover_sim.clear_scene()
         print("Scene cleared.")
 
-#     def on_load_vehicle(self):
-#         """
-#         Method that should be invoked when the button to load the selected vehicle is pressed
-#         """
+
+    def on_load_vehicle(self):
+        """
+        Method that should be invoked when the button to load the selected vehicle is pressed
+        """
+        print("load vehicle...")
 
 #         async def async_load_vehicle():
 #             # Check if we already have a physics environment activated. If not, then activate it

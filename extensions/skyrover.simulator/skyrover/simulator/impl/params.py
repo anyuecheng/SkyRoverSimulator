@@ -23,8 +23,9 @@ ROOT = str(EXTENSION_FOLDER_PATH.parent.parent.parent.parent.resolve())
 ASSET_PATH = ROOT + "/skyrover.simulator/skyrover/simulator/assets"
 ROBOTS_ASSETS = ASSET_PATH + "/Robots"
 
-# # Define the built in robots of the extension
-# ROBOTS = {"Iris": ROBOTS_ASSETS + "/Iris/iris.usd"} #, "Flying Cube": ROBOTS_ASSETS + "/iris_cube.usda"}
+# Define the built in robots of the extension
+AERIAL_ROBOTS = {"Iris": ROBOTS_ASSETS + "/Iris/iris.usd"} #, "Flying Cube": ROBOTS_ASSETS + "/iris_cube.usda"}
+GROUND_ROBOTS = {"Iris": ROBOTS_ASSETS + "/Iris/iris.usd"} #, "Flying Cube": ROBOTS_ASSETS + "/iris_cube.usda"}
 
 # Setup the default simulation environments path
 NVIDIA_ASSETS_PATH = str(nucleus.get_assets_root_path())
@@ -96,7 +97,7 @@ DEFAULT_WORLD_SETTINGS = WORLD_SETTINGS['px4']
 CONFIG_FILE = ROOT + "/skyrover.simulator/config/configs.yaml"
 
 # Define where the thumbnail of the vehicle is located
-# THUMBNAIL = ROBOTS_ASSETS + "/Iris/iris_thumbnail.png"
+THUMBNAIL = ROBOTS_ASSETS + "/Iris/iris_thumbnail.png"
 
 # Define where the thumbail of the world is located
 WORLD_THUMBNAIL = ASSET_PATH + "/Worlds/Empty_thumbnail.png"

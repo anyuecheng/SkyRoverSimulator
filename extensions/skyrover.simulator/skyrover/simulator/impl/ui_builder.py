@@ -19,7 +19,7 @@ import omni.ui as ui
 from omni.ui import color as cl
 
 from skyrover.simulator.impl.ui_handler import UIHandler
-from skyrover.simulator.impl.params import WINDOW_TITLE, SIMULATION_ENVIRONMENTS, WORLD_THUMBNAIL
+from skyrover.simulator.impl.params import WINDOW_TITLE, SIMULATION_ENVIRONMENTS, WORLD_THUMBNAIL, THUMBNAIL, AERIAL_ROBOTS, GROUND_ROBOTS
 
 class SkyRoverWindow(ui.Window):
     """Manage extension UI"""
@@ -66,7 +66,8 @@ class SkyRoverWindow(ui.Window):
 
         # Auxiliar attributes for getting the transforms of the vehicle and the camera from the UI
         self._camera_transform_models = []
-        # self._vehicle_transform_models = []
+        self._aerial_vehicle_transform_models = []
+        self._ground_vehicle_transform_models = []
 
         # Build the actual window UI
         self._build_ui()
@@ -96,9 +97,9 @@ class SkyRoverWindow(ui.Window):
                     self._scene_selection_frame()
                     ui.Spacer(height=5)
                     
-                    # # Create a frame for selecting which vehicle to load in the simulation environment
-                    # self._robot_selection_frame()
-                    # ui.Spacer(height=5)
+                    # Create a frame for selecting which vehicle to load in the simulation environment
+                    self._robot_selection_frame()
+                    ui.Spacer(height=5)
 
                     # Create a frame for selecting the camera position, and what it should point torwards to
                     self._viewport_camera_frame()
@@ -111,7 +112,6 @@ class SkyRoverWindow(ui.Window):
         """
         Method that implements a dropdown menu with the list of available simulation environemts for the vehicle
         """
-
         # Frame for selecting the simulation environment to load
         with ui.CollapsableFrame("Scene Selection"):
             with ui.VStack(height=0, spacing=10, name="frame_v_stack"):
@@ -192,6 +192,140 @@ class SkyRoverWindow(ui.Window):
                             clicked_fn=self._handler.on_clear_scene,
                             style=SkyRoverWindow.BUTTON_BASE_STYLE,
                         )
+
+
+    def _robot_selection_frame(self):
+        """
+        Method that implements a frame that allows the user to choose which robot that is about to be spawned
+        """
+        # Frame for selecting the vehicle to load
+        with ui.CollapsableFrame(title="Vehicle Selection"):
+            with ui.VStack(height=0, spacing=10, name="frame_v_stack"):
+                ui.Spacer(height=SkyRoverWindow.GENERAL_SPACING)
+
+                with ui.CollapsableFrame("Aerial Vehicle Selection", collapsed=False):
+                    with ui.VStack(height=0, spacing=10, name="frame_v_stack"):
+                        with ui.HStack():
+                            # Add a thumbnail image to have a preview of the world that is about to be loaded
+                            with ui.ZStack(width=SkyRoverWindow.LABEL_PADDING, height=SkyRoverWindow.BUTTON_HEIGHT * 2):
+                                ui.Rectangle()
+                                ui.Image(
+                                    THUMBNAIL,
+                                    fill_policy=ui.FillPolicy.PRESERVE_ASPECT_FIT,
+                                    alignment=ui.Alignment.CENTER,
+                                )
+                            ui.Spacer(width=10)
+                    
+                            with ui.VStack():
+                                with ui.HStack():
+                                    # Iterate over all existing robots in the extension
+                                    ui.Label("Vehicle Model", name="label", width=SkyRoverWindow.LABEL_PADDING, alignment=ui.Alignment.TOP)
+
+                                    # Combo box with the available vehicles to select from
+                                    dropdown_menu = ui.ComboBox(0, name="robots")
+                                    for robot in AERIAL_ROBOTS:
+                                        dropdown_menu.model.append_child_item(None, ui.SimpleStringModel(robot))
+                                    self._handler.set_aerial_vehicle_dropdown(dropdown_menu.model)
+
+                                with ui.HStack():
+                                    ui.Label("Vehicle Number", name="label", width=SkyRoverWindow.LABEL_PADDING, alignment=ui.Alignment.TOP)
+                                    vehicle_num_field = ui.IntDrag(name="number", min=0, max=1000, step=0.1)
+                                    self._handler.set_aerial_vehicle_num_field(vehicle_num_field.model)
+                        with ui.HStack():
+                            # Add a frame transform to select the position of where to place the selected robot in the world
+                            self._transform_frame(isAerial=True)
+
+                with ui.CollapsableFrame("Ground Vehicle Selection", collapsed=False):
+                    with ui.VStack(height=0, spacing=10, name="frame_v_stack"):
+                        with ui.HStack():
+                            # Add a thumbnail image to have a preview of the world that is about to be loaded
+                            with ui.ZStack(width=SkyRoverWindow.LABEL_PADDING, height=SkyRoverWindow.BUTTON_HEIGHT * 2):
+                                ui.Rectangle()
+                                ui.Image(
+                                    THUMBNAIL,
+                                    fill_policy=ui.FillPolicy.PRESERVE_ASPECT_FIT,
+                                    alignment=ui.Alignment.CENTER,
+                                )
+                            ui.Spacer(width=10)
+                    
+                            with ui.VStack():
+                                with ui.HStack():
+                                    # Iterate over all existing robots in the extension
+                                    ui.Label("Vehicle Model", name="label", width=SkyRoverWindow.LABEL_PADDING, alignment=ui.Alignment.TOP)
+
+                                    # Combo box with the available vehicles to select from
+                                    dropdown_menu = ui.ComboBox(0, name="robots")
+                                    for robot in GROUND_ROBOTS:
+                                        dropdown_menu.model.append_child_item(None, ui.SimpleStringModel(robot))
+                                    self._handler.set_ground_vehicle_dropdown(dropdown_menu.model)
+
+                                with ui.HStack():
+                                    ui.Label("Vehicle Number", name="label", width=SkyRoverWindow.LABEL_PADDING, alignment=ui.Alignment.TOP)
+                                    vehicle_num_field = ui.IntDrag(name="number", min=0, max=1000, step=0.1)
+                                    self._handler.set_ground_vehicle_num_field(vehicle_num_field.model)
+                        with ui.HStack():
+                            # Add a frame transform to select the position of where to place the selected robot in the world
+                            self._transform_frame(isAerial=False)
+
+                # with ui.HStack():
+                #     # Add a frame transform to select the position of where to place the selected robot in the world
+                #     self._transform_frame()
+                
+                # Button to load the drone
+                ui.Button(
+                    "Load Vehicle",
+                    height=SkyRoverWindow.BUTTON_HEIGHT,
+                    clicked_fn=self._handler.on_load_vehicle,
+                    style=SkyRoverWindow.BUTTON_BASE_STYLE,
+                )
+
+
+    def _transform_frame(self, isAerial: bool=True):
+        """
+        Method that implements a transform frame to translate and rotate an object that is about to be spawned
+        """
+        components = ["Position", "Rotation"]
+        all_axis = ["X", "Y", "Z"]
+        colors = {"X": 0xFF5555AA, "Y": 0xFF76A371, "Z": 0xFFA07D4F}
+        default_values = [0.0, 0.0, 0.1]
+
+        with ui.CollapsableFrame("Position and Orientation"):
+            with ui.VStack(spacing=8):
+
+                ui.Spacer(height=0)
+
+                # Iterate over the position and rotation menus
+                for component in components:
+                    with ui.HStack():
+                        with ui.HStack():
+                            ui.Label(component, name="transform", width=50)
+                            ui.Spacer()
+                        # Fields X, Y and Z
+                        for axis, default_value in zip(all_axis, default_values):
+                            with ui.HStack():
+                                with ui.ZStack(width=15):
+                                    ui.Rectangle(
+                                        width=15,
+                                        height=20,
+                                        style={
+                                            "background_color": colors[axis],
+                                            "border_radius": 3,
+                                            "corner_flag": ui.CornerFlag.LEFT,
+                                        },
+                                    )
+                                    ui.Label(axis, name="transform_label", alignment=ui.Alignment.CENTER)
+                                if component == "Position":
+                                    float_drag = ui.FloatDrag(name="transform", min=-1000000, max=1000000, step=0.01)
+                                    float_drag.model.set_value(default_value)
+                                else:
+                                    float_drag = ui.FloatDrag(name="transform", min=-180.0, max=180.0, step=0.01)
+                                # Save the model of each FloatDrag such that we can access its values later on
+                                if isAerial:
+                                    self._aerial_vehicle_transform_models.append(float_drag.model)
+                                else:
+                                    self._ground_vehicle_transform_models.append(float_drag.model)
+                                ui.Circle(name="transform", width=20, radius=3.5, size_policy=ui.CircleSizePolicy.FIXED)
+                ui.Spacer(height=0)
 
 
     def _viewport_camera_frame(self):
@@ -279,6 +413,26 @@ class SkyRoverWindow(ui.Window):
             camera_pos = np.array([self._camera_transform_models[i].get_value_as_float() for i in range(3)])
             camera_target = np.array([self._camera_transform_models[i].get_value_as_float() for i in range(3, 6)])
             return camera_pos, camera_target
+
+        return None, None
+    
+
+    def get_selected_aerial_pos_ori(self):
+        # Extract the desired position and rotation
+        if len(self._aerial_vehicle_transform_models) == 6:
+            aerial_pos = np.array([self._aerial_vehicle_transform_models[i].get_value_as_float() for i in range(3)])
+            aerial_ori = np.array([self._aerial_vehicle_transform_models[i].get_value_as_float() for i in range(3, 6)])
+            return aerial_pos, aerial_ori
+
+        return None, None
+    
+
+    def get_selected_ground_pos_ori(self):
+        # Extract the desired position and rotation
+        if len(self._ground_vehicle_transform_models) == 6:
+            ground_pos = np.array([self._ground_vehicle_transform_models[i].get_value_as_float() for i in range(3)])
+            ground_ori = np.array([self._ground_vehicle_transform_models[i].get_value_as_float() for i in range(3, 6)])
+            return ground_pos, ground_ori
 
         return None, None
     
