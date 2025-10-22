@@ -1,25 +1,8 @@
-# MIT License
-# 
-# Copyright (c) 2024 <COPYRIGHT_HOLDERS>
-# 
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-# 
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-# 
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-# 
+"""
+| File: ui_builder.py
+| Author: Fei Wang (feiwang@dlmu.edu.cn)
+| License: BSD-3-Clause. Copyright (c) 2025, Fei Wang. All rights reserved.
+"""
 
 """
 Omniverse UI Framework:
@@ -31,49 +14,178 @@ Isaac Sim UI Utilities extension:
 
 import omni.kit.ui
 import omni.ui as ui
+from omni.ui import color as cl
 
+from skyrover.simulator.impl.ui_handler import UIHandler
+from skyrover.simulator.impl.params import WINDOW_TITLE, SIMULATION_ENVIRONMENTS, WORLD_THUMBNAIL
 
-class UIBuilder:
+class SkyRoverWindow(ui.Window):
     """Manage extension UI"""
+    WINDOW_WIDTH = 325
+    WINDOW_HEIGHT = 850
 
-    def __init__(self, window_title, menu_path=None):
-        self._menu = None
-        self._window = None
+    LABEL_PADDING = 120
+    BUTTON_HEIGHT = 50
+    GENERAL_SPACING = 5
 
-        self._menu_path = menu_path
-        self._window_title = window_title
+    BUTTON_SELECTED_STYLE = {
+        "Button": {
+            "background_color": cl("#3780ae"),
+            "border_color": cl("#29587c"),
+            "border_width": 2,
+            "border_radius": 5,
+            "padding": 2,
+        }
+    }
+
+    BUTTON_BASE_STYLE = {
+        "Button": {
+            "background_color": cl("#292929"),
+            "border_color": cl("#292929"),
+            "border_width": 2,
+            "border_radius": 5,
+            "padding": 5,
+        }
+    }
+
+
+    def __init__(self, handler: UIHandler, **kwargs):
+        # Setup the base widget window
+        super().__init__(
+            WINDOW_TITLE, width=SkyRoverWindow.WINDOW_WIDTH, height=SkyRoverWindow.WINDOW_HEIGHT, visible=True, **kwargs
+        )
+
+        self.deferred_dock_in("Property", ui.DockPolicy.CURRENT_WINDOW_IS_ACTIVE)
+
+        # Setup the handler 
+        self._handler = handler
+        # Bind the UI delegate to this window
+        self._handler.set_window_bind(self)
+
+        # Build the actual window UI
+        self._build_ui()
+
+
+    def destroy(self):
+        # Clear the world and the stage correctly
+        self._delegate.on_clear_scene()
+
+        # It will destroy all the children
+        super().destroy()
+
+
+    def _build_ui(self):
+        # Define the UI of the widget window
+        with self.frame:
         
-        # create menu
-        if self._menu_path:
-            self._menu = omni.kit.ui.get_editor_menu().add_item(self._menu_path, self.on_toggle, toggle=True, value=False)
+            with ui.ScrollingFrame(horizontal_scrollbar_policy=ui.ScrollBarPolicy.SCROLLBAR_ALWAYS_ON, vertical_scrollbar_policy=ui.ScrollBarPolicy.SCROLLBAR_ALWAYS_ON):
 
-    def on_toggle(self, *args, **kwargs):
-        """Toggle window visibility"""
-        self.build_ui()
-        if self._window is not None:
-            self._window.visible = not self._window.visible
+                # Vertical Stack of menus
+                with ui.VStack():
+                    # # Create a frame for selecting which backend to load
+                    # self._backend_selection_frame()
+                    # ui.Spacer(height=5)
 
-    def build_ui(self):
-        """Build the Graphical User Interface (GUI) in the underlying windowing system"""
-        if not self._window:
-            self._window = ui.Window(title=self._window_title, visible=False, width=300, height=300)
-            with self._window.frame:
-                # ---------------
-                # Build custom UI
-                # e.g.:
-                self._button = ui.Button("Click me", clicked_fn=lambda: print("Button clicked"))
-                # ---------------
+                    # Create a frame for selecting which scene to load
+                    self._scene_selection_frame()
+                    ui.Spacer(height=5)
+                    
+                    # # Create a frame for selecting which vehicle to load in the simulation environment
+                    # self._robot_selection_frame()
+                    # ui.Spacer(height=5)
 
-    def cleanup(self):
-        """Clean up window and menu"""
-        # destroy window
-        if self._window is not None:
-            self._window.destroy()
-            self._window = None
-        # destroy menu
-        if self._menu is not None:
-            try:
-                omni.kit.ui.get_editor_menu().remove_item(self._menu)
-            except:
-                omni.kit.ui.get_editor_menu().remove_item(self._menu_path)
-            self._menu = None
+                    # # Create a frame for selecting the camera position, and what it should point torwards to
+                    # self._viewport_camera_frame()
+                    # ui.Spacer()
+
+                    self._button = ui.Button("Click me", clicked_fn=lambda: print("Button clicked"))
+
+
+    def _scene_selection_frame(self):
+        """
+        Method that implements a dropdown menu with the list of available simulation environemts for the vehicle
+        """
+
+        # Frame for selecting the simulation environment to load
+        with ui.CollapsableFrame("Scene Selection"):
+            with ui.VStack(height=0, spacing=10, name="frame_v_stack"):
+                ui.Spacer(height=SkyRoverWindow.GENERAL_SPACING)
+
+                # Iterate over all existing pre-made worlds bundled with this extension
+                with ui.HStack():
+                    ui.Label("World Assets", width=SkyRoverWindow.LABEL_PADDING, height=10.0)
+
+                    # Combo box with the available environments to select from
+                    dropdown_menu = ui.ComboBox(0, height=10, name="environments")
+                    for environment in SIMULATION_ENVIRONMENTS:
+                        dropdown_menu.model.append_child_item(None, ui.SimpleStringModel(environment))
+
+                    # Allow the handler to know which option was selected in the dropdown menu
+                    self._handler.set_scene_dropdown(dropdown_menu.model)
+
+                ui.Spacer(height=0)
+
+                # UI to configure the default latitude, longitude and altitude coordinates
+                with ui.CollapsableFrame("Geographic Coordinates", collapsed=False):
+                    with ui.VStack(height=0, spacing=10, name="frame_v_stack"):
+                        with ui.HStack():
+
+                            # Latitude
+                            ui.Label("Latitude", name="label", width=SkyRoverWindow.LABEL_PADDING-50)
+                            latitude_field = ui.FloatField(name="latitude", precision=6)
+                            latitude_field.model.set_value(self._handler._latitude)
+                            self._handler.set_latitude_field(latitude_field.model)
+                            ui.Circle(name="transform", width=20, height=20, radius=3.5, size_policy=ui.CircleSizePolicy.FIXED)
+
+                            # Longitude
+                            ui.Label("Longitude", name="label", width=SkyRoverWindow.LABEL_PADDING-50)
+                            longitude_field = ui.FloatField(name="longitude", precision=6)
+                            longitude_field.model.set_value(self._handler._longitude)
+                            self._handler.set_longitude_field(longitude_field.model)
+                            ui.Circle(name="transform", width=20, height=20, radius=3.5, size_policy=ui.CircleSizePolicy.FIXED)
+
+                            # Altitude
+                            ui.Label("Altitude", name="label", width=SkyRoverWindow.LABEL_PADDING-50)
+                            altitude_field = ui.FloatField(name="altitude", precision=6)
+                            altitude_field.model.set_value(self._handler._altitude)
+                            self._handler.set_altitude_field(altitude_field.model)
+                            ui.Circle(name="transform", width=20, height=20, radius=3.5, size_policy=ui.CircleSizePolicy.FIXED)
+
+                        with ui.HStack():
+                            ui.Button("Set", enabled=True, clicked_fn=self._handler.on_set_new_global_coordinates)
+                            ui.Button("Reset", enabled=True, clicked_fn=self._handler.on_reset_global_coordinates)
+                            ui.Button("Make Default", enabled=True, clicked_fn=self._handler.on_set_new_default_global_coordinates)
+
+                ui.Spacer(height=0)
+
+                with ui.HStack():
+                    # Add a thumbnail image to have a preview of the world that is about to be loaded
+                    with ui.ZStack(width=SkyRoverWindow.LABEL_PADDING, height=SkyRoverWindow.BUTTON_HEIGHT * 2):
+                        ui.Rectangle()
+                        ui.Image(
+                            WORLD_THUMBNAIL,
+                            fill_policy=ui.FillPolicy.PRESERVE_ASPECT_FIT,
+                            alignment=ui.Alignment.LEFT_CENTER,
+                        )
+
+                    ui.Spacer(width=SkyRoverWindow.GENERAL_SPACING)
+
+                    with ui.VStack():
+                        # Button for loading a desired scene
+                        ui.Button(
+                            "Load Scene",
+                            height=SkyRoverWindow.BUTTON_HEIGHT,
+                            clicked_fn=self._handler.on_load_scene,
+                            style=SkyRoverWindow.BUTTON_BASE_STYLE,
+                        )
+
+                        # Button to reset the stage
+                        ui.Button(
+                            "Clear Scene",
+                            height=SkyRoverWindow.BUTTON_HEIGHT,
+                            clicked_fn=self._handler.on_clear_scene,
+                            style=SkyRoverWindow.BUTTON_BASE_STYLE,
+                        )
+
+                
+

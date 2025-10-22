@@ -1,31 +1,29 @@
-# MIT License
-# 
-# Copyright (c) 2024 <COPYRIGHT_HOLDERS>
-# 
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-# 
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-# 
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-# 
+"""
+| File: extension.py
+| Author: Fei Wang (feiwang@dlmu.edu.cn)
+| License: BSD-3-Clause. Copyright (c) 2025, Fei Wang. All rights reserved.
+"""
 
+__all__ = ["SkyRoverSimulatorExtension"]
+
+
+# Python garbage collenction and asyncronous API
+import gc
+import asyncio
+from functools import partial
+
+# Omniverse general API
 import carb
 import omni.ext
 import omni.kit.app
+import omni.ui as ui
 
-from .ui_builder import UIBuilder
+# SkyRover Extension Files and API
+from skyrover.simulator.impl.params import MENU_PATH, WINDOW_TITLE
+
+# Setting up the UI for the extension's window
+from .ui_builder import SkyRoverWindow
+from .ui_handler import UIHandler
 
 
 class SkyRoverSimulatorExtension(omni.ext.IExt):
@@ -33,15 +31,86 @@ class SkyRoverSimulatorExtension(omni.ext.IExt):
 
     def on_startup(self, ext_id):
         """Method called when the extension is loaded/enabled"""
-        carb.log_info(f"on_startup {ext_id}")
-        ext_path = omni.kit.app.get_app().get_extension_manager().get_extension_path(ext_id)
+        carb.log_info(f"on_startup {ext_id}: SkyRover Isaac extension startup")
 
-        # UI handler
-        self.ui_builder = UIBuilder(window_title="Skyrover Simulator", menu_path="Window/Skyrover Simulator")
+        # ext_path = omni.kit.app.get_app().get_extension_manager().get_extension_path(ext_id)
+
+        # Create the UI of the app and its handler
+        self.ui_handler = None
+        self.ui_window = None
+
+        # Add the ability to show the window if the system requires it (QuickLayout feature)
+        ui.Workspace.set_show_window_fn(WINDOW_TITLE, partial(self.show_window, None))
+
+        # Add the extension to the editor menu inside isaac sim
+        editor_menu = omni.kit.ui.get_editor_menu()
+        if editor_menu:
+            self._menu = editor_menu.add_item(MENU_PATH, self.show_window, toggle=True, value=True)
+
+        # Show the window (It call the self.show_window)
+        ui.Workspace.show_window(WINDOW_TITLE, show=True)
+
+
+    def show_window(self, menu, show):
+        if show == True:
+            # Create a window and its handler
+            self.ui_handler = UIHandler()
+            self.ui_window = SkyRoverWindow(self.ui_handler)
+            self.ui_window.set_visibility_changed_fn(self._visibility_changed_fn)
+
+        # If we have a window and we are not supposed to show it, then change its visibility
+        elif self.ui_window:
+            self.ui_window.visible = False
+
+
+    def _visibility_changed_fn(self, visible):
+        """
+        This method is invoked when the user pressed the "X" to close the extension window
+        """
+        # Update the Isaac sim menu visibility
+        editor_menu = omni.kit.ui.get_editor_menu()
+        if editor_menu:
+            editor_menu.set_value(MENU_PATH, visible)
+
+        if not visible:
+            # Destroy the window, because we create a new one in the show window method
+            asyncio.ensure_future(self._destroy_window_async())
+
+
+    async def _destroy_window_async(self):
+        # Wait one frame before it gets destructed (from NVidia example)
+        await omni.kit.app.get_app().next_update_async()
+
+        # Destroy the window UI if it exists
+        if self.ui_window:
+            self.ui_window.destroy()
+            self.ui_window = None
+
 
     def on_shutdown(self):
-        """Method called when the extension is disabled"""
-        carb.log_info(f"on_shutdown")
+        """
+        Callback called when the extension is shutdown
+        """
+        carb.log_info("SkyRover Isaac extension shutdown")
 
-        # clean up UI
-        self.ui_builder.cleanup()
+        # Destroy the isaac sim menu object
+        self._menu = None
+
+        # Destroy the window
+        if self.ui_window:
+            self.ui_window.destroy()
+            self.ui_window = None
+
+        # Destroy the UI handler
+        if self.ui_handler:
+            self.ui_handler = None
+
+        # De-register the function taht shows the window from the isaac sim ui
+        ui.Workspace.set_show_window_fn(WINDOW_TITLE, None)
+
+        editor_menu = omni.kit.ui.get_editor_menu()
+        if editor_menu:
+            editor_menu.remove_item(MENU_PATH)
+
+        # Call the garbage collector
+        gc.collect()
