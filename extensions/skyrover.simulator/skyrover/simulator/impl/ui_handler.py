@@ -104,14 +104,14 @@ class UIHandler:
     def set_scene_dropdown(self, scene_dropdown_model: ui.AbstractItemModel):
         self._scene_dropdown = scene_dropdown_model
     
-#     def set_latitude_field(self, latitude_model: ui.AbstractValueModel):
-#         self._latitude_field = latitude_model
+    def set_latitude_field(self, latitude_model: ui.AbstractValueModel):
+        self._latitude_field = latitude_model
     
-#     def set_longitude_field(self, longitude_model: ui.AbstractValueModel):
-#         self._longitude_field = longitude_model
+    def set_longitude_field(self, longitude_model: ui.AbstractValueModel):
+        self._longitude_field = longitude_model
 
-#     def set_altitude_field(self, altitude_model: ui.AbstractValueModel):
-#         self._altitude_field = altitude_model
+    def set_altitude_field(self, altitude_model: ui.AbstractValueModel):
+        self._altitude_field = altitude_model
 
 #     def set_vehicle_dropdown(self, vehicle_dropdown_model: ui.AbstractItemModel):
 #         self._vehicle_dropdown = vehicle_dropdown_model

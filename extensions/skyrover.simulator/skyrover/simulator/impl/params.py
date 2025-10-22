@@ -96,10 +96,10 @@ for asset in NVIDIA_SIMULATION_ENVIRONMENTS:
 # DEFAULT_WORLD_SETTINGS = WORLD_SETTINGS['px4']
 
 # Define where the thumbnail of the vehicle is located
-THUMBNAIL = ROBOTS_ASSETS + "/Iris/iris_thumbnail.png"
+# THUMBNAIL = ROBOTS_ASSETS + "/Iris/iris_thumbnail.png"
 
-# # Define where the thumbail of the world is located
-# WORLD_THUMBNAIL = ASSET_PATH + "/Worlds/Empty_thumbnail.png"
+# Define where the thumbail of the world is located
+WORLD_THUMBNAIL = ASSET_PATH + "/Worlds/Empty_thumbnail.png"
 
 # BACKENDS_THUMBMAILS_PATH = ASSET_PATH + "/Backends"
 # BACKENDS_THUMBMAILS = {
