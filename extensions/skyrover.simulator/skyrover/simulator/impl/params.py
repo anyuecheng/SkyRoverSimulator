@@ -17,7 +17,7 @@ MENU_PATH = "Window/" + WINDOW_TITLE
 
 # Get the current directory of where this extension is located
 EXTENSION_FOLDER_PATH = Path(os.path.dirname(os.path.realpath(__file__)))
-ROOT = str(EXTENSION_FOLDER_PATH.parent.parent.parent.resolve())
+ROOT = str(EXTENSION_FOLDER_PATH.parent.parent.parent.parent.resolve())
 
 # # Get the configurations file path
 # CONFIG_FILE = ROOT + "/pegasus.simulator/config/configs.yaml"

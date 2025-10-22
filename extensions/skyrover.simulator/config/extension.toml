@@ -34,6 +34,13 @@ icon = "data/icon.png"
 [[python.module]]
 name = "skyrover.simulator"
 
+[python.pipapi]
+requirements = ["numpy", "scipy", "pymavlink", "pyyaml", "toml"]
+use_online_index = true
+
+[python.build-system]
+requires = ["setuptools"]
+
 [settings]
 exts."skyrover.simulator".timeout = 5
 

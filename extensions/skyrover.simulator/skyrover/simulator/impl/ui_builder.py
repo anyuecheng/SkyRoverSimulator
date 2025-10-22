@@ -68,7 +68,7 @@ class SkyRoverWindow(ui.Window):
 
     def destroy(self):
         # Clear the world and the stage correctly
-        self._delegate.on_clear_scene()
+        self._handler.on_clear_scene()
 
         # It will destroy all the children
         super().destroy()
