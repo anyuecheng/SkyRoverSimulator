@@ -22,7 +22,7 @@ import isaacsim.storage.native as nucleus
 
 # Pegasus Simulator internal API
 from skyrover.simulator.impl.params import DEFAULT_WORLD_SETTINGS, SIMULATION_ENVIRONMENTS, CONFIG_FILE
-# from pegasus.simulator.logic.vehicle_manager import VehicleManager
+from skyrover.simulator.core.vehicle_manager import VehicleManager
 
 
 class SkyRoverInterface:
@@ -40,7 +40,7 @@ class SkyRoverInterface:
 
         # Get a handle to the vehicle manager instance which will manage which vehicles are spawned in the world
         # to be controlled and simulated
-        # self._vehicle_manager = VehicleManager()
+        self._vehicle_manager = VehicleManager()
 
         self._world_settings = DEFAULT_WORLD_SETTINGS
         self._world = None
@@ -66,14 +66,15 @@ class SkyRoverInterface:
         """
         return self._world
 
-    # @property
-    # def vehicle_manager(self):
-    #     """The instance of the VehicleManager.
 
-    #     Returns:
-    #         VehicleManager: The current instance of the VehicleManager.
-    #     """
-    #     return self._vehicle_manager
+    @property
+    def vehicle_manager(self):
+        """The instance of the VehicleManager.
+
+        Returns:
+            VehicleManager: The current instance of the VehicleManager.
+        """
+        return self._vehicle_manager
     
 
     @property
@@ -174,25 +175,26 @@ class SkyRoverInterface:
         #asyncio.ensure_future(self._world.initialize_simulation_context_async())
 
 
-    # def get_vehicle(self, stage_prefix: str):
-    #     """Method that returns the vehicle object given its 'stage_prefix', i.e., the name the vehicle was spawned with in the simulator.
+    def get_vehicle(self, stage_prefix: str):
+        """Method that returns the vehicle object given its 'stage_prefix', i.e., the name the vehicle was spawned with in the simulator.
 
-    #     Args:
-    #         stage_prefix (str): The name the vehicle will present in the simulator when spawned. 
+        Args:
+            stage_prefix (str): The name the vehicle will present in the simulator when spawned. 
 
-    #     Returns:
-    #         Vehicle: Returns a vehicle object that was spawned with the given 'stage_prefix'
-    #     """
-    #     return self._vehicle_manager.vehicles[stage_prefix]
+        Returns:
+            Vehicle: Returns a vehicle object that was spawned with the given 'stage_prefix'
+        """
+        return self._vehicle_manager.get_vehicle(stage_prefix)
 
-    # def get_all_vehicles(self):
-    #     """
-    #     Method that returns a list of vehicles that are considered active in the simulator
 
-    #     Returns:
-    #         list: A list of all vehicles that are currently instantiated.
-    #     """
-    #     return self._vehicle_manager.vehicles
+    def get_all_vehicles(self):
+        """
+        Method that returns a list of vehicles that are considered active in the simulator
+
+        Returns:
+            list: A list of all vehicles that are currently instantiated.
+        """
+        return self._vehicle_manager.vehicles
 
 
     def get_default_environments(self):
@@ -381,6 +383,18 @@ class SkyRoverInterface:
         return px4_dir
     
 
+    def _get_px4_default_airframe_from_config(self):
+        px4_default_airframe = ""
+        try:
+            with open(CONFIG_FILE, 'r') as f:
+                data = yaml.safe_load(f)
+            px4_default_airframe = os.path.expanduser(data.get("px4_default_airframe", None))
+        except:
+            carb.log_warn("Could not retrieve px4_default_airframe from: " + str(CONFIG_FILE))
+
+        return px4_default_airframe
+    
+
     # def _get_ardupilot_path_from_config(self):
     #     """
     #     Method that reads the configured ArduPilot installation directory from the extension configuration file 
@@ -400,19 +414,7 @@ class SkyRoverInterface:
     #         carb.log_warn("Could not retrieve ardupilot_dir from: " + str(CONFIG_FILE))
 
     #     return ardupilot_dir
-    
 
-    def _get_px4_default_airframe_from_config(self):
-        px4_default_airframe = ""
-        try:
-            with open(CONFIG_FILE, 'r') as f:
-                data = yaml.safe_load(f)
-            px4_default_airframe = os.path.expanduser(data.get("px4_default_airframe", None))
-        except:
-            carb.log_warn("Could not retrieve px4_default_airframe from: " + str(CONFIG_FILE))
-
-        return px4_default_airframe
-    
 
     # def _get_ardupilot_default_airframe_from_config(self):
     #     """
