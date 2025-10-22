@@ -21,4 +21,4 @@
 # SOFTWARE.
 # 
 
-from .extension import SkyRover_SimulatorExtension
+from .extension import SkyRoverSimulatorExtension

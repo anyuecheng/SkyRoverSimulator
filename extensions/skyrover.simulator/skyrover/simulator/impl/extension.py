@@ -28,7 +28,7 @@ import omni.kit.app
 from .ui_builder import UIBuilder
 
 
-class Extension(omni.ext.IExt):
+class SkyRoverSimulatorExtension(omni.ext.IExt):
     """The Extension class"""
 
     def on_startup(self, ext_id):
