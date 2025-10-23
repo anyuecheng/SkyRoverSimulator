@@ -41,7 +41,7 @@ from skyrover.simulator.impl.params import BACKEND_CONFIG_PATH
 class ROS2MultiRotorBackendConfig(BackendConfig):
     def __init__(self, config_file: str = None):
         if config_file is None:
-            config_file = os.path.join(BACKEND_CONFIG_PATH, "ros2_multirotor_backend_config.yaml")
+            config_file = os.path.join(BACKEND_CONFIG_PATH, "ros2_multirotor.yaml")
         super().__init__(config_file)
 
         self.set("num_rotors", 4)
@@ -76,36 +76,8 @@ class ROS2MultiRotorBackendConfig(BackendConfig):
 class ROS2MultiRotorAerialBackendConfig(BackendConfig):
     def __init__(self, config_file: str = None):
         if config_file is None:
-            config_file = os.path.join(BACKEND_CONFIG_PATH, "ros2_multirotor_aerial_backend_config.yaml")
+            config_file = os.path.join(BACKEND_CONFIG_PATH, "ros2_multirotor_aerial.yaml")
         super().__init__(config_file)
-
-        self.set("num_rotors", 4)
-        self.set("namespace", "vehicle")
-
-        self.set("pub_state", True)
-        self.set("pub_pose", True)
-        self.set("pub_twist", True)
-        self.set("pub_accel", True)
-        self.set("pub_twist_inertial", True)
-
-        self.set("pub_sensors", True)
-        self.set("pub_imu", True)
-        self.set("pub_mag", True)
-        self.set("pub_gps", True)
-        self.set("pub_gps_vel", True)
-
-        self.set("pub_graphical_sensors", True)
-        self.set("pub_tf", False)
-        self.set("sub_control", True)
-
-        self.set("pose_topic", "state/pose")
-        self.set("twist_topic", "state/twist")
-        self.set("accel_topic", "state/accel")
-        self.set("twist_inertial_topic", "state/twist_inertial")
-        self.set("imu_topic", "sensors/imu")
-        self.set("mag_topic", "sensors/mag")
-        self.set("gps_topic", "sensors/gps")
-        self.set("gps_vel_topic", "sensors/gps_vel")
 
 
 class ROS2MultiRotorGroundBackendConfig(BackendConfig):

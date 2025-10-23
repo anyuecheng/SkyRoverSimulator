@@ -208,7 +208,7 @@ class UIHandler:
             selected_world = self._scene_names[environemnt_index]
             
             # Try to spawn the selected world
-            self._skyrover_sim.set_world_settings(**WORLD_SETTINGS[self._streaming_backend])
+            self._skyrover_sim.set_world_settings(**WORLD_SETTINGS[self._aerial_backend])
             asyncio.ensure_future(self._skyrover_sim.load_environment_async(SIMULATION_ENVIRONMENTS[selected_world], force_clear=True))
             print("Loading scene: " + selected_world + " from path: " + SIMULATION_ENVIRONMENTS[selected_world])
 
@@ -225,25 +225,13 @@ class UIHandler:
         """
         Method that should be invoked when the button to load the selected vehicle is pressed
         """
-        print("load vehicle...")
-
-        if self._window:
-            aerial_position, aerial_oritation = self._window.get_selected_aerial_pos_ori()
-            self._aerial_vehicle_num = self._aerial_vehicle_num_field.get_value_as_int()
-            print("aerial settings:")
-            print(aerial_position, aerial_oritation, self._aerial_vehicle_num)
-            ground_position, ground_oritation = self._window.get_selected_ground_pos_ori()
-            self._ground_vehicle_num = self._ground_vehicle_num_field.get_value_as_int()
-            print("ground settings:")
-            print(ground_position, ground_oritation, self._ground_vehicle_num)
-            # if aerial_position is not None and aerial_oritation is not None:
-            #     self._skyrover_sim.set_viewport_camera(eye=camera_position, target=camera_target)
-
         async def async_load_vehicle():
             # Check if we already have a physics environment activated. If not, then activate it
             # and only after spawn the vehicle. This is to avoid trying to spawn a vehicle without a physics
             # environment setup. This way we can even spawn a vehicle in an empty world and it won't care
             if hasattr(self._skyrover_sim.world, "_physics_context") == False:
+                if self._skyrover_sim.world is None:
+                    self._skyrover_sim.initialize_world()
                 await self._skyrover_sim.world.initialize_simulation_context_async()
 
             # Check if a vehicle is selected in the drop-down menu
@@ -270,8 +258,9 @@ class UIHandler:
 
                 aerial_backend_index = self._aerial_vehicle_backend_dropdown.get_item_value_model().as_int
                 ground_backend_index = self._ground_vehicle_backend_dropdown.get_item_value_model().as_int
-                self._aerial_backend = BACKENDS[aerial_backend_index]
-                self._ground_backend = BACKENDS[ground_backend_index]
+                backends_names = list(BACKENDS.keys())
+                self._aerial_backend = BACKENDS[backends_names[aerial_backend_index]]
+                self._ground_backend = BACKENDS[backends_names[ground_backend_index]]
 
                 id = 0
                 for i in range(self._aerial_vehicle_num):
@@ -298,12 +287,10 @@ class UIHandler:
                     print("Spawning aerial vehicle with backend: " + self._aerial_backend)
                     print("Spawning aerial vehicle number: " + str(self._aerial_vehicle_num))
 
-                    print("original position: " + str(aerial_position))
-                    aerial_position[aerial_spawn_axis] += i * aerial_spawn_distance
                     print("at position: " + str(aerial_position) + " and orientation: " + str(aerial_oritation))
 
-                    backend_config.save()
-                    print("Backend config saved to: " + str(backend_config.filename))
+                    aerial_position[aerial_spawn_axis] += aerial_spawn_distance
+
 
 
 

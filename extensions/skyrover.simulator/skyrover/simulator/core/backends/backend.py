@@ -38,17 +38,17 @@ class BackendConfig():
     def save(self):
         """Save the configuration to the YAML file    
         """
-        config_data = {}
+        temp_config = {}
         try:
             with open(self.filename, 'r') as file:
-                config_data = yaml.safe_load(file)
-
+                temp_config = yaml.safe_load(file)
+                
             # for key, value in self.__dict__.items():
             for key, value in self.config_data.items():
-                config_data[key] = value
+                temp_config[key] = value
 
             with open(self.filename, 'w') as file:
-                yaml.dump(config_data, file)
+                yaml.dump(temp_config, file)
         except:
             carb.log_warn("Could not save backend config to: " + str(self.filename))
 

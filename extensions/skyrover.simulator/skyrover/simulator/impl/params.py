@@ -93,7 +93,7 @@ WORLD_SETTINGS = {
         "device": "cpu"
     }
 }
-DEFAULT_WORLD_SETTINGS = WORLD_SETTINGS['px4']
+DEFAULT_WORLD_SETTINGS = WORLD_SETTINGS['ros2']
 
 # Get the configurations file path
 CONFIG_FILE = ROOT + "/skyrover.simulator/config/configs.yaml"

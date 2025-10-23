@@ -234,7 +234,7 @@ class SkyRoverWindow(ui.Window):
                                     dropdown_menu = ui.ComboBox(0, name="backends")
                                     for backend in BACKENDS:
                                         dropdown_menu.model.append_child_item(None, ui.SimpleStringModel(backend))
-                                    self._handler.set_ground_vehicle_backend_dropdown(dropdown_menu.model)
+                                    self._handler.set_aerial_vehicle_backend_dropdown(dropdown_menu.model)
 
                                 with ui.HStack():
                                     ui.Label("Vehicle Number", name="label", width=SkyRoverWindow.LABEL_PADDING, alignment=ui.Alignment.TOP)
@@ -307,61 +307,60 @@ class SkyRoverWindow(ui.Window):
         colors = {"X": 0xFF5555AA, "Y": 0xFF76A371, "Z": 0xFFA07D4F}
         default_values = [0.0, 0.0, 0.1]
 
-        with ui.CollapsableFrame("Position and Orientation"):
-            with ui.VStack(spacing=8):
-                ui.Spacer(height=0)
-                # Iterate over the position and rotation menus
-                for component in components:
-                    with ui.HStack():
-                        with ui.HStack():
-                            ui.Label(component, name="transform", width=50)
-                            ui.Spacer()
-                        # Fields X, Y and Z
-                        for axis, default_value in zip(all_axis, default_values):
-                            with ui.HStack():
-                                with ui.ZStack(width=15):
-                                    ui.Rectangle(
-                                        width=15,
-                                        height=20,
-                                        style={
-                                            "background_color": colors[axis],
-                                            "border_radius": 3,
-                                            "corner_flag": ui.CornerFlag.LEFT,
-                                        },
-                                    )
-                                    ui.Label(axis, name="transform_label", alignment=ui.Alignment.CENTER)
-                                if component == "Position":
-                                    float_drag = ui.FloatDrag(name="transform", min=-1000000, max=1000000, step=0.01)
-                                    float_drag.model.set_value(default_value)
-                                else:
-                                    float_drag = ui.FloatDrag(name="transform", min=-180.0, max=180.0, step=0.1)
-                                # Save the model of each FloatDrag such that we can access its values later on
-                                if isAerial:
-                                    self._aerial_vehicle_transform_models.append(float_drag.model)
-                                else:
-                                    self._ground_vehicle_transform_models.append(float_drag.model)
-                                ui.Circle(name="transform", width=20, radius=3.5, size_policy=ui.CircleSizePolicy.FIXED)
-
-                ui.Spacer(height=10)
-
+        # with ui.CollapsableFrame("Position and Orientation"):
+        with ui.VStack(spacing=8):
+            ui.Spacer(height=0)
+            # Iterate over the position and rotation menus
+            for component in components:
                 with ui.HStack():
-                    ui.Label("Spawned Axis", name="label", alignment=ui.Alignment.LEFT)
+                    with ui.HStack():
+                        ui.Label(component, name="transform", width=50)
+                        ui.Spacer()
+                    # Fields X, Y and Z
+                    for axis, default_value in zip(all_axis, default_values):
+                        with ui.HStack():
+                            with ui.ZStack(width=15):
+                                ui.Rectangle(
+                                    width=15,
+                                    height=20,
+                                    style={
+                                        "background_color": colors[axis],
+                                        "border_radius": 3,
+                                        "corner_flag": ui.CornerFlag.LEFT,
+                                    },
+                                )
+                                ui.Label(axis, name="transform_label", alignment=ui.Alignment.CENTER)
+                            if component == "Position":
+                                float_drag = ui.FloatDrag(name="transform", min=-1000000, max=1000000, step=0.01)
+                                float_drag.model.set_value(default_value)
+                            else:
+                                float_drag = ui.FloatDrag(name="transform", min=-180.0, max=180.0, step=0.1)
+                            # Save the model of each FloatDrag such that we can access its values later on
+                            if isAerial:
+                                self._aerial_vehicle_transform_models.append(float_drag.model)
+                            else:
+                                self._ground_vehicle_transform_models.append(float_drag.model)
+                            ui.Circle(name="transform", width=20, radius=3.5, size_policy=ui.CircleSizePolicy.FIXED)
 
-                    dropdown_menu = ui.ComboBox(0, name="axises")
-                    for axis in all_axis:
-                        dropdown_menu.model.append_child_item(None, ui.SimpleStringModel(axis))
+            with ui.HStack():
+                ui.Label("Spawned Axis", name="label", alignment=ui.Alignment.LEFT)
 
-                    ui.Circle(name="transform", width=20, radius=3.5, size_policy=ui.CircleSizePolicy.FIXED)
-                    ui.Label("Distance", name="transform_label", alignment=ui.Alignment.CENTER)
-                    float_drag = ui.FloatDrag(name="transform", min=0, max=20, step=0.01)
-                    float_drag.model.set_value(1)
+                dropdown_menu = ui.ComboBox(0, name="axises")
+                for axis in all_axis:
+                    dropdown_menu.model.append_child_item(None, ui.SimpleStringModel(axis))
 
-                    if isAerial:
-                        self._handler.set_aerial_vehicle_spawn_axis(dropdown_menu.model)
-                        self._handler.set_aerial_vehicle_spawn_distance(float_drag.model)
-                    else:
-                        self._handler.set_ground_vehicle_spawn_axis(dropdown_menu.model)
-                        self._handler.set_ground_vehicle_spawn_distance(float_drag.model)
+                # ui.Circle(name="transform", width=20, radius=3.5, size_policy=ui.CircleSizePolicy.FIXED)
+                ui.Label("Distance", name="transform_label", alignment=ui.Alignment.CENTER)
+                float_drag = ui.FloatDrag(name="transform", min=0, max=20, step=0.01)
+                float_drag.model.set_value(1)
+                ui.Circle(name="transform", width=20, radius=3.5, size_policy=ui.CircleSizePolicy.FIXED)
+
+                if isAerial:
+                    self._handler.set_aerial_vehicle_spawn_axis(dropdown_menu.model)
+                    self._handler.set_aerial_vehicle_spawn_distance(float_drag.model)
+                else:
+                    self._handler.set_ground_vehicle_spawn_axis(dropdown_menu.model)
+                    self._handler.set_ground_vehicle_spawn_distance(float_drag.model)
                     
 
     def _viewport_camera_frame(self):
