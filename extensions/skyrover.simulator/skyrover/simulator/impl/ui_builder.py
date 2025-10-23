@@ -229,7 +229,7 @@ class SkyRoverWindow(ui.Window):
 
                                 with ui.HStack():
                                     ui.Label("Vehicle Number", name="label", width=SkyRoverWindow.LABEL_PADDING, alignment=ui.Alignment.TOP)
-                                    vehicle_num_field = ui.IntDrag(name="number", min=0, max=1000, step=0.1)
+                                    vehicle_num_field = ui.IntDrag(name="number", min=0, max=1000, step=0.05)
                                     self._handler.set_aerial_vehicle_num_field(vehicle_num_field.model)
                         with ui.HStack():
                             # Add a frame transform to select the position of where to place the selected robot in the world
@@ -261,7 +261,7 @@ class SkyRoverWindow(ui.Window):
 
                                 with ui.HStack():
                                     ui.Label("Vehicle Number", name="label", width=SkyRoverWindow.LABEL_PADDING, alignment=ui.Alignment.TOP)
-                                    vehicle_num_field = ui.IntDrag(name="number", min=0, max=1000, step=0.1)
+                                    vehicle_num_field = ui.IntDrag(name="number", min=0, max=1000, step=0.05)
                                     self._handler.set_ground_vehicle_num_field(vehicle_num_field.model)
                         with ui.HStack():
                             # Add a frame transform to select the position of where to place the selected robot in the world
@@ -318,7 +318,7 @@ class SkyRoverWindow(ui.Window):
                                     float_drag = ui.FloatDrag(name="transform", min=-1000000, max=1000000, step=0.01)
                                     float_drag.model.set_value(default_value)
                                 else:
-                                    float_drag = ui.FloatDrag(name="transform", min=-180.0, max=180.0, step=0.01)
+                                    float_drag = ui.FloatDrag(name="transform", min=-180.0, max=180.0, step=0.1)
                                 # Save the model of each FloatDrag such that we can access its values later on
                                 if isAerial:
                                     self._aerial_vehicle_transform_models.append(float_drag.model)

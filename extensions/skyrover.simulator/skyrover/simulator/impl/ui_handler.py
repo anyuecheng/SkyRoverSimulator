@@ -15,7 +15,7 @@ import carb
 import omni.ui as ui
 
 # Extension Configurations
-from skyrover.simulator.impl.params import SIMULATION_ENVIRONMENTS, WORLD_SETTINGS, BACKENDS
+from skyrover.simulator.impl.params import SIMULATION_ENVIRONMENTS, WORLD_SETTINGS, BACKENDS, AERIAL_ROBOTS, GROUND_ROBOTS
 from skyrover.simulator.core.interface.skyrover_interface import SkyRoverInterface
 
 # # Vehicle Manager to spawn Vehicles
@@ -57,9 +57,15 @@ class UIHandler:
         self._altitude_field: ui.AbstractValueModel = None
         self._altitude = SkyRoverInterface().altitude
 
-#         # Attribute that hold the currently selected vehicle from the dropdown menu
-#         self._vehicle_dropdown: ui.AbstractItemModel = None
-#         self._vehicles_names = list(ROBOTS.keys())
+        self._aerial_vehicle_dropdown: ui.AbstractItemModel = None
+        self._aerial_vehicles_names = list(AERIAL_ROBOTS.keys())
+        self._aerial_vehicle_num_field: ui.AbstractValueModel = None
+        self._aerial_vehicle_num: int = 0
+
+        self._ground_vehicle_dropdown: ui.AbstractItemModel = None
+        self._ground_vehicles_names = list(GROUND_ROBOTS.keys())
+        self._ground_vehicle_num_field: ui.AbstractValueModel = None
+        self._ground_vehicle_num: int = 0
 
 #         # Get an instance of the vehicle manager
 #         self._vehicle_manager = VehicleManager()
@@ -68,9 +74,7 @@ class UIHandler:
         # By default we assume PX4
         self._streaming_backend: str = BACKENDS['px4']
 
-#         # Selected value for the the id of the vehicle
-#         self._vehicle_id_field: ui.AbstractValueModel = None
-#         self._vehicle_id: int = 0
+        
 
 #         # Attribute that will save the model for the px4-autostart checkbox
 #         self._px4_autostart_checkbox: ui.AbstractValueModel = None
@@ -202,6 +206,18 @@ class UIHandler:
         Method that should be invoked when the button to load the selected vehicle is pressed
         """
         print("load vehicle...")
+
+        if self._window:
+            aerial_position, aerial_oritation = self._window.get_selected_aerial_pos_ori()
+            self._aerial_vehicle_num = self._aerial_vehicle_num_field.get_value_as_int()
+            print("aerial settings:")
+            print(aerial_position, aerial_oritation, self._aerial_vehicle_num)
+            ground_position, ground_oritation = self._window.get_selected_ground_pos_ori()
+            self._ground_vehicle_num = self._ground_vehicle_num_field.get_value_as_int()
+            print("ground settings:")
+            print(ground_position, ground_oritation, self._ground_vehicle_num)
+            # if aerial_position is not None and aerial_oritation is not None:
+            #     self._skyrover_sim.set_viewport_camera(eye=camera_position, target=camera_target)
 
 #         async def async_load_vehicle():
 #             # Check if we already have a physics environment activated. If not, then activate it

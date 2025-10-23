@@ -238,8 +238,8 @@ class SkyRoverInterface:
         # Clear the stage
         clear_stage()
 
-        # # Remove all the robots that were spawned
-        # self._vehicle_manager.remove_all_vehicles()
+        # Remove all the robots that were spawned
+        self._vehicle_manager.remove_all_vehicles()
 
         # Call python's garbage collection
         gc.collect()
