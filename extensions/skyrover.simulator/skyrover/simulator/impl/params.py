@@ -24,8 +24,10 @@ ASSET_PATH = ROOT + "/skyrover.simulator/skyrover/simulator/assets"
 ROBOTS_ASSETS = ASSET_PATH + "/Robots"
 
 # Define the built in robots of the extension
-AERIAL_ROBOTS = {"Iris": ROBOTS_ASSETS + "/Iris/iris.usd"} #, "Flying Cube": ROBOTS_ASSETS + "/iris_cube.usda"}
-GROUND_ROBOTS = {"Iris": ROBOTS_ASSETS + "/Iris/iris.usd"} #, "Flying Cube": ROBOTS_ASSETS + "/iris_cube.usda"}
+AERIAL_ROBOTS = {"Iris": ROBOTS_ASSETS + "/Iris/iris.usd",
+                 "aerial": ROBOTS_ASSETS + "/Iris/iris.usd"} 
+GROUND_ROBOTS = {"Iris": ROBOTS_ASSETS + "/Iris/iris.usd",
+                 "ground": ROBOTS_ASSETS + "/Iris/iris.usd"}
 
 # Setup the default simulation environments path
 NVIDIA_ASSETS_PATH = str(nucleus.get_assets_root_path())
@@ -65,9 +67,9 @@ for asset in NVIDIA_SIMULATION_ENVIRONMENTS:
 #     SIMULATION_ENVIRONMENTS[asset] = OMNIVERSE_ENVIRONMENTS[asset]
 
 BACKENDS = {
-    "px4": "px4",
-    "ardupilot": "ardupilot",
-    "ros2": "ros2"
+    "ros2": "ros2",
+    # "ardupilot": "ardupilot",
+    "px4": "px4"
 }
 
 # Define the default settings for the simulation environment
@@ -108,3 +110,6 @@ WORLD_THUMBNAIL = ASSET_PATH + "/Worlds/Empty_thumbnail.png"
 #     "ardupilot": BACKENDS_THUMBMAILS_PATH + "/ardupilot_logo.png",
 #     "ros2": BACKENDS_THUMBMAILS_PATH + "/ros2_logo.png"
 # }
+
+# Get the backend configurations file path
+BACKEND_CONFIG_PATH = ROOT + "/skyrover.simulator/skyrover/simulator/core/backends"

@@ -18,18 +18,18 @@ import omni.ui as ui
 from skyrover.simulator.impl.params import SIMULATION_ENVIRONMENTS, WORLD_SETTINGS, BACKENDS, AERIAL_ROBOTS, GROUND_ROBOTS
 from skyrover.simulator.core.interface.skyrover_interface import SkyRoverInterface
 
-# # Vehicle Manager to spawn Vehicles
-# from pegasus.simulator.logic.backends import Backend, BackendConfig, PX4MavlinkBackend, PX4MavlinkBackendConfig, ArduPilotMavlinkBackend, ArduPilotMavlinkBackendConfig
+# Vehicle Manager to spawn Vehicles
+from skyrover.simulator.core.backends import Backend, BackendConfig
 # from pegasus.simulator.logic.vehicles.multirotor import Multirotor, MultirotorConfig
 # from pegasus.simulator.logic.vehicle_manager import VehicleManager
 # from pegasus.simulator.logic.graphical_sensors.monocular_camera import MonocularCamera
 
-# try:
-#     from pegasus.simulator.logic.backends import ROS2Backend
-#     ROS2_available = True
-# except ImportError:
-#     ROS2_available = False
-#     carb.log_warn("ROS2 backend not available. Please install the ROS2 extension to use this feature.")
+try:
+    from skyrover.simulator.core.backends import ROS2MultiRotorBackend, ROS2MultiRotorAerialBackendConfig, ROS2MultiRotorGroundBackendConfig
+    ROS2_available = True
+except ImportError:
+    ROS2_available = False
+    carb.log_warn("ROS2 backend not available. Please install the ROS2 extension to use this feature.")
 
 
 class UIHandler:
@@ -71,10 +71,9 @@ class UIHandler:
 #         self._vehicle_manager = VehicleManager()
 
         # Selected option for broadcasting the simulated vehicle (PX4+ROS2 or just ROS2)
-        # By default we assume PX4
-        self._streaming_backend: str = BACKENDS['px4']
-
-        
+        # By default we assume ROS2
+        self._aerial_backend: str = BACKENDS['ros2']      
+        self._ground_backend: str = BACKENDS['ros2']
 
 #         # Attribute that will save the model for the px4-autostart checkbox
 #         self._px4_autostart_checkbox: ui.AbstractValueModel = None
@@ -118,17 +117,38 @@ class UIHandler:
     def set_aerial_vehicle_dropdown(self, vehicle_dropdown_model: ui.AbstractItemModel):
         self._aerial_vehicle_dropdown = vehicle_dropdown_model
 
+    def set_aerial_vehicle_backend_dropdown(self, vehicle_backend_model: ui.AbstractItemModel):
+        self._aerial_vehicle_backend_dropdown = vehicle_backend_model
+
     def set_aerial_vehicle_num_field(self, vehicle_num_field: ui.AbstractValueModel):
         self._aerial_vehicle_num_field = vehicle_num_field
+
+    def set_aerial_vehicle_spawn_axis(self, spawn_axis_model: ui.AbstractItemModel):
+        self._aerial_vehicle_spawn_axis = spawn_axis_model
+
+    def set_aerial_vehicle_spawn_distance(self, spawn_distance_field: ui.AbstractValueModel):
+        self._aerial_vehicle_spawn_distance = spawn_distance_field
 
     def set_ground_vehicle_dropdown(self, vehicle_dropdown_model: ui.AbstractItemModel):
         self._ground_vehicle_dropdown = vehicle_dropdown_model
 
+    def set_ground_vehicle_backend_dropdown(self, vehicle_backend_model: ui.AbstractItemModel):
+        self._ground_vehicle_backend_dropdown = vehicle_backend_model
+
     def set_ground_vehicle_num_field(self, vehicle_num_field: ui.AbstractValueModel):
         self._ground_vehicle_num_field = vehicle_num_field
 
-    def set_streaming_backend(self, backend: str = BACKENDS['px4']):
-        self._streaming_backend = backend
+    def set_ground_vehicle_spawn_axis(self, spawn_axis_model: ui.AbstractItemModel):
+        self._ground_vehicle_spawn_axis = spawn_axis_model
+
+    def set_ground_vehicle_spawn_distance(self, spawn_distance_field: ui.AbstractValueModel):
+        self._ground_vehicle_spawn_distance = spawn_distance_field
+
+    def set_aerial_backend(self, backend: str = BACKENDS['ros2']):
+        self._aerial_backend = backend
+
+    def set_ground_backend(self, backend: str = BACKENDS['ros2']):
+        self._ground_backend = backend
 
 #     def set_px4_autostart_checkbox(self, checkbox_model:ui.AbstractValueModel):
 #         self._px4_autostart_checkbox = checkbox_model
@@ -219,110 +239,95 @@ class UIHandler:
             # if aerial_position is not None and aerial_oritation is not None:
             #     self._skyrover_sim.set_viewport_camera(eye=camera_position, target=camera_target)
 
-#         async def async_load_vehicle():
-#             # Check if we already have a physics environment activated. If not, then activate it
-#             # and only after spawn the vehicle. This is to avoid trying to spawn a vehicle without a physics
-#             # environment setup. This way we can even spawn a vehicle in an empty world and it won't care
-#             if hasattr(self._pegasus_sim.world, "_physics_context") == False:
-#                 await self._pegasus_sim.world.initialize_simulation_context_async()
+        async def async_load_vehicle():
+            # Check if we already have a physics environment activated. If not, then activate it
+            # and only after spawn the vehicle. This is to avoid trying to spawn a vehicle without a physics
+            # environment setup. This way we can even spawn a vehicle in an empty world and it won't care
+            if hasattr(self._skyrover_sim.world, "_physics_context") == False:
+                await self._skyrover_sim.world.initialize_simulation_context_async()
 
-#             # Check if a vehicle is selected in the drop-down menu
-#             if self._vehicle_dropdown is not None and self._window is not None:
+            # Check if a vehicle is selected in the drop-down menu
+            if self._window is not None and self._aerial_vehicle_dropdown is not None and self._ground_vehicle_dropdown is not None:
+                aerial_vehicle_index = self._aerial_vehicle_dropdown.get_item_value_model().as_int
+                ground_vehicle_index = self._ground_vehicle_dropdown.get_item_value_model().as_int
 
-#                 # Get the id of the selected vehicle from the list
-#                 vehicle_index = self._vehicle_dropdown.get_item_value_model().as_int
+                # Get the name of the selected vehicle
+                selected_aerial_robot = self._aerial_vehicles_names[aerial_vehicle_index]
+                selected_ground_robot = self._ground_vehicles_names[ground_vehicle_index]
 
-#                 # Get the name of the selected vehicle
-#                 selected_robot = self._vehicles_names[vehicle_index]
+                self._aerial_vehicle_num = self._aerial_vehicle_num_field.get_value_as_int()
+                self._ground_vehicle_num = self._ground_vehicle_num_field.get_value_as_int()
 
-#                 # Get the id of the selected vehicle
-#                 self._vehicle_id = self._vehicle_id_field.get_value_as_int()
+                # Get the desired position and orientation of the vehicle from the UI transform
+                aerial_position, aerial_oritation = self._window.get_selected_aerial_pos_ori()
+                ground_position, ground_oritation = self._window.get_selected_ground_pos_ori()
 
-#                 # Get the desired position and orientation of the vehicle from the UI transform
-#                 pos, euler_angles = self._window.get_selected_vehicle_attitude()
-                
-#                 backend_config: BackendConfig = None
-#                 backend: Backend = None
+                aerial_spawn_axis = self._aerial_vehicle_spawn_axis.get_item_value_model().as_int
+                ground_spawn_axis = self._ground_vehicle_spawn_axis.get_item_value_model().as_int
 
-#                 if self._streaming_backend == BACKENDS["px4"]:
-#                     # Read if we should auto-start px4 from the checkbox
-#                     px4_autostart = self._px4_autostart_checkbox.get_value_as_bool()
+                aerial_spawn_distance = self._aerial_vehicle_spawn_distance.get_value_as_float()
+                ground_spawn_distance = self._ground_vehicle_spawn_distance.get_value_as_float()
 
-#                     # Read the PX4 path from the field
-#                     px4_path = os.path.expanduser(self._px4_directory_field.get_value_as_string())
+                aerial_backend_index = self._aerial_vehicle_backend_dropdown.get_item_value_model().as_int
+                ground_backend_index = self._ground_vehicle_backend_dropdown.get_item_value_model().as_int
+                self._aerial_backend = BACKENDS[aerial_backend_index]
+                self._ground_backend = BACKENDS[ground_backend_index]
 
-#                     # Read the PX4 airframe from the field
-#                     px4_airframe = self._px4_airframe_field.get_value_as_string()
+                id = 0
+                for i in range(self._aerial_vehicle_num):
+                    id += 1
 
-#                     backend_config = PX4MavlinkBackendConfig({
-#                         "vehicle_id": self._vehicle_id,
-#                         "px4_autolaunch": px4_autostart,
-#                         "px4_dir": px4_path,
-#                         "px4_vehicle_model": px4_airframe
-#                     })
-#                     backend = PX4MavlinkBackend(config=backend_config)
-#                     carb.log_warn("PX4 backend selected.")
-                
-#                 elif self._streaming_backend == BACKENDS["ardupilot"]:
-#                     # # Read if we should auto-start ardupilot from the checkbox
-#                     ardupilot_autostart = self._ardupilot_autostart_checkbox.get_value_as_bool()
+                    backend_config: BackendConfig = None
+                    backend: Backend = None
 
-#                     # Read the ArduPilot path from the field
-#                     ardupilot_path = os.path.expanduser(self._ardupilot_directory_field.get_value_as_string())
+                    if self._aerial_backend == BACKENDS["ros2"]:  
+                        if ROS2_available:
+                            backend_config = ROS2MultiRotorAerialBackendConfig()
+                            backend = ROS2MultiRotorBackend(vehicle_id=id, config=backend_config)
+                            carb.log_warn("ROS2 backend selected for aerial vehicle.")
+                        else:
+                            carb.log_warn("ROS2 not available. Please run Isaac Sim with ROS 2 extension correctly enabled.")
+                            return
+                    else:
+                        carb.log_warn("Invalid backend selected. Not spawning the vehicle.")
+                        return
+                    
+                    
+                    
+                    print("Spawning aerial vehicle: " + selected_aerial_robot)
+                    print("Spawning aerial vehicle with backend: " + self._aerial_backend)
+                    print("Spawning aerial vehicle number: " + str(self._aerial_vehicle_num))
 
-#                     # Read the ArduPilot airframe from the field
-#                     ardupilot_airframe = self._ardupilot_airframe_field.get_value_as_string()
+                    print("original position: " + str(aerial_position))
+                    aerial_position[aerial_spawn_axis] += i * aerial_spawn_distance
+                    print("at position: " + str(aerial_position) + " and orientation: " + str(aerial_oritation))
 
-#                     backend_config = ArduPilotMavlinkBackendConfig({
-#                         "vehicle_id": self._vehicle_id,
-#                         "ardupilot_autolaunch": ardupilot_autostart,
-#                         "ardupilot_dir": ardupilot_path,
-#                         "ardupilot_vehicle_model": ardupilot_airframe
-#                     })
-#                     backend = ArduPilotMavlinkBackend(config=backend_config)
-#                     carb.log_warn("Ardupilot backend selected.")
-                
-#                 elif self._streaming_backend == BACKENDS["ros2"]:    
-#                     if ROS2_available:
-#                         backend = ROS2Backend(vehicle_id=self._vehicle_id, config={
-#                             "namespace": 'drone',
-#                             "pub_sensors": True,
-#                             "pub_graphical_sensors": True,
-#                             "pub_state": True,
-#                             "pub_tf": False,
-#                             "sub_control": True}
-#                             )
-#                         carb.log_warn("ROS2 backend selected.")
-#                     else:
-#                         carb.log_warn("ROS2 not available. Please run Isaac Sim with ROS 2 extension correctly enabled.")
-#                         return
-#                 else:
-#                     carb.log_warn("Invalid backend selected. Not spawning the vehicle.")
-#                     return
-                   
-#                 # Create the multirotor configuration
-#                 config_multirotor = MultirotorConfig()
-#                 config_multirotor.backends = [backend]
-#                 config_multirotor.graphical_sensors = [MonocularCamera("camera", config={"update_rate": 60.0})]
-                
-#                 # Try to spawn the selected robot in the world to the specified namespace
-#                 Multirotor(
-#                     "/World/quadrotor",
-#                     ROBOTS[selected_robot],
-#                     self._vehicle_id,
-#                     pos,
-#                     Rotation.from_euler("XYZ", euler_angles, degrees=True).as_quat(),
-#                     config=config_multirotor,
-#                 )
+                    backend_config.save()
+                    print("Backend config saved to: " + str(backend_config.filename))
 
-#             # Log that a vehicle of the type multirotor was spawned in the world via the extension UI
-#                 carb.log_info("Spawned the robot: " + selected_robot + " using the Pegasus Simulator UI")
-#             else:
-#                 # Log that it was not possible to spawn the vehicle in the world using the Pegasus Simulator UI
-#                 carb.log_error("Could not spawn the robot using the Pegasus Simulator UI")
 
-#         # Run the actual vehicle spawn async so that the UI does not freeze
-#         asyncio.ensure_future(async_load_vehicle())        
+
+                    
+                    # # Create the multirotor configuration
+                    # config_multirotor = MultirotorConfig()
+                    # config_multirotor.backends = [backend]
+                    # config_multirotor.graphical_sensors = [MonocularCamera("camera", config={"update_rate": 60.0})]
+
+                    # # Try to spawn the selected robot in the world to the specified namespace
+                    # Multirotor(
+                    #     "/World/quadrotor",
+                    #     ROBOTS[selected_robot],
+                    #     self._vehicle_id,
+                    #     pos,
+                    #     Rotation.from_euler("XYZ", euler_angles, degrees=True).as_quat(),
+                    #     config=config_multirotor,
+                    # )
+                carb.log_info("Spawned the " + str(self._aerial_vehicle_num) + " robots: " + selected_aerial_robot)  
+            else:
+                carb.log_error("Could not spawn the robot using the SkyRover Simulator UI")
+
+        # Run the actual vehicle spawn async so that the UI does not freeze
+        asyncio.ensure_future(async_load_vehicle())        
 
     def on_set_viewport_camera(self):
         """
