@@ -20,8 +20,8 @@ from skyrover.simulator.core.interface.skyrover_interface import SkyRoverInterfa
 
 # Vehicle Manager to spawn Vehicles
 from skyrover.simulator.core.backends import Backend, BackendConfig
-# from pegasus.simulator.logic.vehicles.multirotor import Multirotor, MultirotorConfig
-# from pegasus.simulator.logic.vehicle_manager import VehicleManager
+from skyrover.simulator.core.vehicles.multirotor_aerial import MultirotorAerialConfig
+# from skyrover.simulator.core.vehicle_manager import VehicleManager
 # from pegasus.simulator.logic.graphical_sensors.monocular_camera import MonocularCamera
 
 try:
@@ -67,8 +67,8 @@ class UIHandler:
         self._ground_vehicle_num_field: ui.AbstractValueModel = None
         self._ground_vehicle_num: int = 0
 
-#         # Get an instance of the vehicle manager
-#         self._vehicle_manager = VehicleManager()
+        # # Get an instance of the vehicle manager
+        # self._vehicle_manager = VehicleManager()
 
         # Selected option for broadcasting the simulated vehicle (PX4+ROS2 or just ROS2)
         # By default we assume ROS2
@@ -282,7 +282,16 @@ class UIHandler:
                         return
                     
                     
-                    
+                    # Create the multirotor configuration
+                    config_multirotor = MultirotorAerialConfig()
+                    config_multirotor.stage_prefix = "quadrotor"
+                    config_multirotor.backends = [backend]
+                    # config_multirotor.graphical_sensors = [MonocularCamera("camera", config={"update_rate": 60.0})]
+
+                    config_multirotor.test()
+
+
+
                     print("Spawning aerial vehicle: " + selected_aerial_robot)
                     print("Spawning aerial vehicle with backend: " + self._aerial_backend)
                     print("Spawning aerial vehicle number: " + str(self._aerial_vehicle_num))
@@ -293,12 +302,6 @@ class UIHandler:
 
 
 
-
-                    
-                    # # Create the multirotor configuration
-                    # config_multirotor = MultirotorConfig()
-                    # config_multirotor.backends = [backend]
-                    # config_multirotor.graphical_sensors = [MonocularCamera("camera", config={"update_rate": 60.0})]
 
                     # # Try to spawn the selected robot in the world to the specified namespace
                     # Multirotor(

@@ -112,4 +112,9 @@ WORLD_THUMBNAIL = ASSET_PATH + "/Worlds/Empty_thumbnail.png"
 # }
 
 # Get the backend configurations file path
-BACKEND_CONFIG_PATH = ROOT + "/skyrover.simulator/skyrover/simulator/core/backends"
+AERIAL_BACKEND_CONFIG = ROOT + "/skyrover.simulator/config/ros2_multirotor_aerial_backend.yaml"
+GROUND_BACKEND_CONFIG = ROOT + "/skyrover.simulator/config/ros2_multirotor_ground_backend.yaml"
+
+# Get the Thrust configurations file path
+AERIAL_ROBOT_CONFIG = ROOT + "/skyrover.simulator/config/aerial_robot.yaml"
+GROUND_ROBOT_CONFIG = ROOT + "/skyrover.simulator/config/ground_robot.yaml"

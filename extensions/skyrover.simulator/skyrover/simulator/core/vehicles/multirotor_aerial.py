@@ -14,33 +14,41 @@ from skyrover.simulator.core.vehicles.vehicle import Vehicle
 # Mavlink interface
 # from pegasus.simulator.logic.backends.px4_mavlink_backend import PX4MavlinkBackend, PX4MavlinkBackendConfig
 
+from skyrover.simulator.core.config_yaml import ConfigYaml
+from skyrover.simulator.params import AERIAL_ROBOT_CONFIG
+
 # Sensors and dynamics setup
-from pegasus.simulator.logic.dynamics import LinearDrag
-from pegasus.simulator.logic.thrusters import QuadraticThrustCurve
-from pegasus.simulator.logic.sensors import Barometer, IMU, Magnetometer, GPS
+from skyrover.simulator.core.dynamics import LinearDrag
+from skyrover.simulator.core.thrusters import QuadraticThrustCurve
+from skyrover.simulator.core.sensors import Barometer, IMU, Magnetometer, GPS
 
-class MultirotorConfig:
-    """
-    A data class that is used for configuring a Multirotor
-    """
-
-    def __init__(self):
+class MultirotorAerialConfig(ConfigYaml):
+    def __init__(self, filename: str = AERIAL_ROBOT_CONFIG):
+        """Initialize the BackendConfig class
         """
-        Initialization of the MultirotorConfig class
-        """
+        super().__init__(filename)
 
         # Stage prefix of the vehicle when spawning in the world
-        self.stage_prefix = "quadrotor"
+        self.stage_prefix = self.get("stage_prefix", "quadrotor")
 
         # The USD file that describes the visual aspect of the vehicle (and some properties such as mass and moments of inertia)
-        self.usd_file = ""
+        self.usd_file = self.get("usd_file", "")
 
         # The default thrust curve for a quadrotor and dynamics relating to drag
-        self.thrust_curve = QuadraticThrustCurve()
-        self.drag = LinearDrag([0.50, 0.30, 0.0])
+        self.thrust_curve = QuadraticThrustCurve(self)
+        # self.drag = LinearDrag([0.50, 0.30, 0.0])
+        self.drag = LinearDrag(self.get("drag", [0.50, 0.30, 0.0]))
 
         # The default sensors for a quadrotor
-        self.sensors = [Barometer(), IMU(), Magnetometer(), GPS()]
+        self.sensors = []
+        if self.get("use_barometer", True):
+            self.sensors.append(Barometer())
+        if self.get("use_imu", True):
+            self.sensors.append(IMU())
+        if self.get("use_magnetometer", True):
+            self.sensors.append(Magnetometer())
+        if self.get("use_gps", True):
+            self.sensors.append(GPS())
 
         # The default graphical sensors for a quadrotor
         self.graphical_sensors = []
@@ -51,10 +59,28 @@ class MultirotorConfig:
         # The backends for actually sending commands to the vehicle. By default use mavlink (with default mavlink configurations)
         # [Can be None as well, if we do not desired to use PX4 with this simulated vehicle]. It can also be a ROS2 backend
         # or your own custom Backend implementation!
-        self.backends = [PX4MavlinkBackend(config=PX4MavlinkBackendConfig())]
+        # self.backends = [PX4MavlinkBackend(config=PX4MavlinkBackendConfig())]
+        self.backends = []
+
+    def test(self):
+        """Test method to verify if the configuration is valid
+        """
+        print("stage_prefix:", self.stage_prefix)
+        print("usd_file:", self.usd_file)
+        print("thrust_curve.rot_dir:", self.thrust_curve.rot_dir)
+        print("thrust_curve.rolling_moment:", self.thrust_curve.rolling_moment)
+        print("thrust_curve.velocity:", self.thrust_curve.velocity)
+        print("thrust_curve.force:", self.thrust_curve.force)
+        print("drag:", self.drag.drag)
+        for sensor in self.sensors:
+            print("sensor:", sensor.sensor_type)
+            print("sensor update_rate:", sensor.update_rate)
+        for backend in self.backends:
+            print("backend:", type(backend))
+            print("backend config:", backend.config.filename)
 
 
-class Multirotor(Vehicle):
+class MultirotorAerial(Vehicle):
     """Multirotor class - It defines a base interface for creating a multirotor
     """
     def __init__(

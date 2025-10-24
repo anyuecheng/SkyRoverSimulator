@@ -3,5 +3,5 @@
 | License: BSD-3-Clause. Copyright (c) 2025, Fei Wang. All rights reserved.
 """
 
-from .vehicle import Vehicle
-from .multirotor_aerial import MultirotorAerialConfig, MultiRotorAerial
+from .thrust_curve import ThrustCurve
+from .quadratic_thrust_curve import QuadraticThrustCurve

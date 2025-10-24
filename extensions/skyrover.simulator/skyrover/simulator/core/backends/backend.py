@@ -7,57 +7,15 @@ __all__ = ["Backend", "BackendConfig"]
 
 
 from abc import ABC, abstractmethod
-import yaml
 
-# NVidia API imports
-import carb
+from skyrover.simulator.core.config_yaml import ConfigYaml
 
 
-class BackendConfig():
+class BackendConfig(ConfigYaml):
     def __init__(self, filename: str = None):
         """Initialize the BackendConfig class
         """
-        self.config_data = {}
-        self.filename = filename
-        if self.filename is not None:
-            self.load()
-
-        
-    def load(self):
-        """Load the configuration from the YAML file    
-        """
-        try:
-            with open(self.filename, 'r') as file:
-                self.config_data = yaml.safe_load(file)
-                # for key, value in config_data.items():
-                #     setattr(self, key, value)
-        except:
-            carb.log_warn("Could not retrieve backend config from: " + str(self.filename))
-
-
-    def save(self):
-        """Save the configuration to the YAML file    
-        """
-        temp_config = {}
-        try:
-            with open(self.filename, 'r') as file:
-                temp_config = yaml.safe_load(file)
-                
-            # for key, value in self.__dict__.items():
-            for key, value in self.config_data.items():
-                temp_config[key] = value
-
-            with open(self.filename, 'w') as file:
-                yaml.dump(temp_config, file)
-        except:
-            carb.log_warn("Could not save backend config to: " + str(self.filename))
-
-
-    def get(self, key: str, default_value=None):
-        return self.config_data.get(key, default_value)
-
-    def set(self, key: str, value):
-        self.config_data[key] = value
+        super().__init__(filename)
 
 
 class Backend(ABC):

@@ -4,8 +4,6 @@
 | License: BSD-3-Clause. Copyright (c) 2025, Fei Wang. All rights reserved.
 """
 
-import os
-
 # Make sure the ROS2 extension is enabled
 import carb
 from isaacsim.core.utils.extensions import enable_extension
@@ -35,13 +33,13 @@ import omni.replicator.core as rep
 from isaacsim.ros2.bridge import read_camera_info
 
 from skyrover.simulator.core.backends.backend import Backend, BackendConfig
-from skyrover.simulator.impl.params import BACKEND_CONFIG_PATH
+from skyrover.simulator.impl.params import AERIAL_BACKEND_CONFIG, GROUND_BACKEND_CONFIG
 
 
 class ROS2MultiRotorBackendConfig(BackendConfig):
     def __init__(self, config_file: str = None):
         if config_file is None:
-            config_file = os.path.join(BACKEND_CONFIG_PATH, "ros2_multirotor.yaml")
+            config_file = AERIAL_BACKEND_CONFIG
         super().__init__(config_file)
 
         self.set("num_rotors", 4)
@@ -76,14 +74,14 @@ class ROS2MultiRotorBackendConfig(BackendConfig):
 class ROS2MultiRotorAerialBackendConfig(BackendConfig):
     def __init__(self, config_file: str = None):
         if config_file is None:
-            config_file = os.path.join(BACKEND_CONFIG_PATH, "ros2_multirotor_aerial.yaml")
+            config_file = AERIAL_BACKEND_CONFIG
         super().__init__(config_file)
 
 
 class ROS2MultiRotorGroundBackendConfig(BackendConfig):
     def __init__(self, config_file: str = None):
         if config_file is None:
-            config_file = os.path.join(BACKEND_CONFIG_PATH, "ros2_multirotor_ground_backend_config.yaml")
+            config_file = GROUND_BACKEND_CONFIG
         super().__init__(config_file)
 
 
