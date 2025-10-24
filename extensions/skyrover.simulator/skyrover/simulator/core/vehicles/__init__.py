@@ -4,4 +4,4 @@
 """
 
 from .vehicle import Vehicle
-from .multirotor_aerial import MultirotorAerialConfig, MultiRotorAerial
+from .multirotor_aerial import MultirotorAerialConfig, MultirotorAerial

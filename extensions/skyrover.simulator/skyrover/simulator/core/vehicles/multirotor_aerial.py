@@ -15,7 +15,7 @@ from skyrover.simulator.core.vehicles.vehicle import Vehicle
 # from pegasus.simulator.logic.backends.px4_mavlink_backend import PX4MavlinkBackend, PX4MavlinkBackendConfig
 
 from skyrover.simulator.core.config_yaml import ConfigYaml
-from skyrover.simulator.params import AERIAL_ROBOT_CONFIG
+from skyrover.simulator.impl.params import AERIAL_ROBOT_CONFIG
 
 # Sensors and dynamics setup
 from skyrover.simulator.core.dynamics import LinearDrag
@@ -92,7 +92,7 @@ class MultirotorAerial(Vehicle):
         # Spawning pose of the vehicle
         init_pos=[0.0, 0.0, 0.07],
         init_orientation=[0.0, 0.0, 0.0, 1.0],
-        config=MultirotorConfig(),
+        config=MultirotorAerialConfig(),
     ):
         """Initializes the multirotor object
 
