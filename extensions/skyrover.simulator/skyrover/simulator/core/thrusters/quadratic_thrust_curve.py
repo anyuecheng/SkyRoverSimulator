@@ -34,14 +34,17 @@ class QuadraticThrustCurve(ThrustCurve):
 
         # The rotor constant used for computing the total thrust produced by the rotor: T = rotor_constant * omega^2
         self._rotor_constant = config.get("rotor_constant", [8.54858e-6, 8.54858e-6, 8.54858e-6, 8.54858e-6])
+        # print(self._rotor_constant)
         assert len(self._rotor_constant) == self._num_rotors
 
         # The rotor constant used for computing the total torque generated about the vehicle Z-axis
         self._rolling_moment_coefficient = config.get("rolling_moment_coefficient", [1e-6, 1e-6, 1e-6, 1e-6])
+        # print(self._rolling_moment_coefficient)
         assert len(self._rolling_moment_coefficient) == self._num_rotors
 
         # Save the rotor direction of rotation
         self._rot_dir = config.get("rot_dir", [-1, -1, 1, 1])
+        # print(self._rot_dir)
         assert len(self._rot_dir) == self._num_rotors
 
         # Values for the minimum and maximum rotor velocity in rad/s

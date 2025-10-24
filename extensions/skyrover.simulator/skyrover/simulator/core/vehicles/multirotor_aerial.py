@@ -106,7 +106,8 @@ class MultirotorAerial(Vehicle):
         """
 
         # 1. Initiate the Vehicle object itself
-        super().__init__(stage_prefix+str(vehicle_id), usd_file, init_pos, init_orientation, config.sensors, config.graphical_sensors, config.graphs, config.backends)
+        full_prefix = stage_prefix + str(vehicle_id)
+        super().__init__(full_prefix, usd_file, init_pos, init_orientation, config.sensors, config.graphical_sensors, config.graphs, config.backends)
 
         # 2. Setup the dynamics of the system - get the thrust curve of the vehicle from the configuration
         self._thrusters = config.thrust_curve

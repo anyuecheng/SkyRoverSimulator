@@ -14,7 +14,7 @@ import rclpy
 from std_msgs.msg import Float64
 from geometry_msgs.msg import TransformStamped
 from sensor_msgs.msg import Imu, MagneticField, NavSatFix, NavSatStatus
-from geometry_msgs.msg import PoseStamped, TwistStamped, AccelStamped
+from geometry_msgs.msg import PoseStamped, TwistStamped, AccelStamped, Pose
 
 # TF imports
 # Check if these libraries exist in the system
@@ -183,12 +183,43 @@ class ROS2MultiRotorBackend(Backend):
             # The current setup as it is.... its a pain!!!!
             self.rotor_subs = []
             for i in range(self._num_rotors):
-                self.rotor_subs.append(self.node.create_subscription(Float64, self._namespace + str(self._id) + "/control/rotor" + str(i) + "/ref", lambda x: self.rotor_callback(x, i),10))
+                self.rotor_subs.append(
+                    self.node.create_subscription(
+                        Float64, 
+                        self._namespace + "/control/rotor" + str(i) + "/ref", 
+                        lambda x, i=i: self.rotor_callback(x, i),
+                        10))
+            self.rotor_subs.append(
+                    self.node.create_subscription(
+                        Pose, 
+                        self._namespace + "/control/rotors/ref", 
+                        self.rotors_callback,
+                        10))
 
 
     def rotor_callback(self, ros_msg: Float64, rotor_id):
         # Update the reference for the rotor of the vehicle
         self.input_ref[rotor_id] = float(ros_msg.data)
+        # print(rotor_id, self.input_ref[rotor_id])
+
+    def rotors_callback(self, ros_msg: Pose):
+        # Update the reference for the rotor of the vehicle
+        data = []
+        data.append(float(ros_msg.orientation.x))
+        data.append(float(ros_msg.orientation.y))
+        data.append(float(ros_msg.orientation.z))
+        data.append(float(ros_msg.orientation.w))
+        data.append(float(ros_msg.position.x))
+        data.append(float(ros_msg.position.y))
+        data.append(float(ros_msg.position.z))
+
+        rotor_id = 0
+        while rotor_id < self._num_rotors:
+            if rotor_id < 7:
+                self.input_ref[rotor_id] = data[rotor_id]
+            else:
+                print('msg used for control rotors is not enough.')
+            rotor_id += 1
 
 
     def send_static_transforms(self):

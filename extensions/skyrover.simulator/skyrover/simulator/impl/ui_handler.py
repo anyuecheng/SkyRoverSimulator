@@ -296,7 +296,7 @@ class UIHandler:
                     MultirotorAerial(
                         "/World/quadrotor",
                         AERIAL_ROBOTS[selected_aerial_robot],
-                        id,
+                        self._vehicle_id,
                         aerial_position,
                         Rotation.from_euler("XYZ", aerial_oritation, degrees=True).as_quat(),
                         config=config_multirotor,
