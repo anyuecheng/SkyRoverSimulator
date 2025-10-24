@@ -20,7 +20,7 @@ from skyrover.simulator.core.interface.skyrover_interface import SkyRoverInterfa
 
 # Vehicle Manager to spawn Vehicles
 from skyrover.simulator.core.backends import Backend, BackendConfig
-from skyrover.simulator.core.vehicles.multirotor_aerial import MultirotorAerialConfig
+from skyrover.simulator.core.vehicles.multirotor_aerial import MultirotorAerialConfig, MultirotorAerial
 # from skyrover.simulator.core.vehicle_manager import VehicleManager
 # from pegasus.simulator.logic.graphical_sensors.monocular_camera import MonocularCamera
 
@@ -74,6 +74,8 @@ class UIHandler:
         # By default we assume ROS2
         self._aerial_backend: str = BACKENDS['ros2']      
         self._ground_backend: str = BACKENDS['ros2']
+
+        self._vehicle_id: int = 0
 
 #         # Attribute that will save the model for the px4-autostart checkbox
 #         self._px4_autostart_checkbox: ui.AbstractValueModel = None
@@ -218,6 +220,7 @@ class UIHandler:
         Method that should be invoked when the clear world button is pressed
         """
         self._skyrover_sim.clear_scene()
+        self._vehicle_id = 0
         print("Scene cleared.")
 
 
@@ -262,9 +265,8 @@ class UIHandler:
                 self._aerial_backend = BACKENDS[backends_names[aerial_backend_index]]
                 self._ground_backend = BACKENDS[backends_names[ground_backend_index]]
 
-                id = 0
                 for i in range(self._aerial_vehicle_num):
-                    id += 1
+                    self._vehicle_id += 1
 
                     backend_config: BackendConfig = None
                     backend: Backend = None
@@ -272,7 +274,7 @@ class UIHandler:
                     if self._aerial_backend == BACKENDS["ros2"]:  
                         if ROS2_available:
                             backend_config = ROS2MultiRotorAerialBackendConfig()
-                            backend = ROS2MultiRotorBackend(vehicle_id=id, config=backend_config)
+                            backend = ROS2MultiRotorBackend(vehicle_id=self._vehicle_id, config=backend_config)
                             carb.log_warn("ROS2 backend selected for aerial vehicle.")
                         else:
                             carb.log_warn("ROS2 not available. Please run Isaac Sim with ROS 2 extension correctly enabled.")
@@ -288,14 +290,21 @@ class UIHandler:
                     config_multirotor.backends = [backend]
                     # config_multirotor.graphical_sensors = [MonocularCamera("camera", config={"update_rate": 60.0})]
 
-                    config_multirotor.test()
+                    # config_multirotor.test()
 
-
+                    # Try to spawn the selected robot in the world to the specified namespace
+                    MultirotorAerial(
+                        "/World/quadrotor",
+                        AERIAL_ROBOTS[selected_aerial_robot],
+                        id,
+                        aerial_position,
+                        Rotation.from_euler("XYZ", aerial_oritation, degrees=True).as_quat(),
+                        config=config_multirotor,
+                    )
 
                     print("Spawning aerial vehicle: " + selected_aerial_robot)
                     print("Spawning aerial vehicle with backend: " + self._aerial_backend)
                     print("Spawning aerial vehicle number: " + str(self._aerial_vehicle_num))
-
                     print("at position: " + str(aerial_position) + " and orientation: " + str(aerial_oritation))
 
                     aerial_position[aerial_spawn_axis] += aerial_spawn_distance
@@ -303,15 +312,7 @@ class UIHandler:
 
 
 
-                    # # Try to spawn the selected robot in the world to the specified namespace
-                    # Multirotor(
-                    #     "/World/quadrotor",
-                    #     ROBOTS[selected_robot],
-                    #     self._vehicle_id,
-                    #     pos,
-                    #     Rotation.from_euler("XYZ", euler_angles, degrees=True).as_quat(),
-                    #     config=config_multirotor,
-                    # )
+                    
                 carb.log_info("Spawned the " + str(self._aerial_vehicle_num) + " robots: " + selected_aerial_robot)  
             else:
                 carb.log_error("Could not spawn the robot using the SkyRover Simulator UI")

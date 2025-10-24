@@ -106,7 +106,7 @@ class MultirotorAerial(Vehicle):
         """
 
         # 1. Initiate the Vehicle object itself
-        super().__init__(stage_prefix, usd_file, init_pos, init_orientation, config.sensors, config.graphical_sensors, config.graphs, config.backends)
+        super().__init__(stage_prefix+str(vehicle_id), usd_file, init_pos, init_orientation, config.sensors, config.graphical_sensors, config.graphs, config.backends)
 
         # 2. Setup the dynamics of the system - get the thrust curve of the vehicle from the configuration
         self._thrusters = config.thrust_curve
@@ -143,10 +143,10 @@ class MultirotorAerial(Vehicle):
         self._thrusters.set_input_reference(desired_rotor_velocities)
 
         # Get the desired forces to apply to the vehicle
-        forces_z, _, rolling_moment = self._thrusters.update(self._state, dt)
+        forces_z, _, yawing_moment = self._thrusters.update(self._state, dt)
 
         # Apply force to each rotor
-        for i in range(4):
+        for i in range(len(forces_z)):
 
             # Apply the force in Z on the rotor frame
             self.apply_force([0.0, 0.0, forces_z[i]], body_part="/rotor" + str(i))
@@ -154,8 +154,9 @@ class MultirotorAerial(Vehicle):
             # Generate the rotating propeller visual effect
             self.handle_propeller_visual(i, forces_z[i], articulation)
 
-        # Apply the torque to the body frame of the vehicle that corresponds to the rolling moment
-        self.apply_torque([0.0, 0.0, rolling_moment], "/body")
+        
+        # Apply the torque to the body frame of the vehicle that corresponds to the yawing moment
+        self.apply_torque([0.0, 0.0, yawing_moment], "/body")
 
         # Compute the total linear drag force to apply to the vehicle's body frame
         drag = self._drag.update(self._state, dt)
@@ -164,6 +165,7 @@ class MultirotorAerial(Vehicle):
         # Call the update methods in all backends
         for backend in self._backends:
             backend.update(dt)
+
 
     def handle_propeller_visual(self, rotor_number, force: float, articulation):
         """
@@ -188,6 +190,47 @@ class MultirotorAerial(Vehicle):
         # Not spinning
         else:
             self.get_dc_interface().set_dof_velocity(joint, 0)
+
+
+    def calculate_roll_pitch_torques(self):
+        """
+        计算所有电机产生的滚转(x轴)和俯仰(y轴)总力矩
+        
+        Returns:
+            tuple: (roll_torque, pitch_torque) 滚转和俯仰力矩 [Nm]
+        """
+        
+        # 获取机体参考系
+        rb = self.get_dc_interface().get_rigid_body(self._stage_prefix + "/body")
+        
+        # 获取所有电机
+        rotors = [self.get_dc_interface().get_rigid_body(self._stage_prefix + "/rotor" + str(i)) 
+                for i in range(self._thrusters._num_rotors)]
+        
+        # 获取电机相对位置
+        relative_poses = self.get_dc_interface().get_relative_body_poses(rb, rotors)
+        
+        roll_torque = 0.0    # x轴力矩 - 滚转
+        pitch_torque = 0.0   # y轴力矩 - 俯仰
+        
+        for i in range(self._thrusters._num_rotors):
+            # 计算当前电机推力
+            thrust_i = self._thrusters._rotor_constant[i] * np.power(self._thrusters._velocity[i], 2)
+            
+            # 获取电机位置坐标
+            # relative_poses[i].p[0] = x坐标, relative_poses[i].p[1] = y坐标
+            x_pos = relative_poses[i].p[0]   # 电机x坐标
+            y_pos = relative_poses[i].p[1]   # 电机y坐标
+            
+            # 计算单个电机的力矩贡献
+            # 滚转力矩(x轴): 推力 × y坐标
+            roll_torque += thrust_i * y_pos
+            
+            # 俯仰力矩(y轴): -推力 × x坐标 (注意负号)
+            pitch_torque += -thrust_i * x_pos
+        
+        return roll_torque, pitch_torque
+
 
     def force_and_torques_to_velocities(self, force: float, torque: np.ndarray):
         """

@@ -23,6 +23,7 @@ from omni.isaac.dynamic_control import _dynamic_control
 from skyrover.simulator.core.state import State
 from skyrover.simulator.core.interface.skyrover_interface import SkyRoverInterface
 from skyrover.simulator.core.vehicle_manager import VehicleManager
+from skyrover.simulator.core.sensors.geo_mag_utils import reprojection
 
 
 def get_world_transform_xform(prim: Usd.Prim):
@@ -125,8 +126,9 @@ class Vehicle(Robot):
         # --------------------------------------------------------------------
         self._sensors = sensors
         
+        latitude_rad, longitude_rad = reprojection(init_pos, SkyRoverInterface().latitude, SkyRoverInterface().longitude)
         for sensor in self._sensors:
-            sensor.initialize(self, SkyRoverInterface().latitude, SkyRoverInterface().longitude, SkyRoverInterface().altitude)
+            sensor.initialize(self, latitude_rad, longitude_rad, SkyRoverInterface().altitude)
 
         # Add callbacks to the physics engine to update each sensor at every timestep
         # and let the sensor decide depending on its internal update rate whether to generate new data
@@ -391,6 +393,7 @@ class Vehicle(Robot):
         # Apply the force to the rigidbody. The force should be expressed in the rigidbody frame
         self.get_dc_interface().apply_body_force(rb, carb._carb.Float3(force), carb._carb.Float3(pos), False)
 
+
     def apply_torque(self, torque, body_part="/body"):
         """
         Method that when invoked applies a given torque vector to /<rigid_body_name>/"body" or to /<rigid_body_name>/<body_part>.
@@ -405,6 +408,7 @@ class Vehicle(Robot):
 
         # Apply the torque to the rigidbody. The torque should be expressed in the rigidbody frame
         self.get_dc_interface().apply_body_torque(rb, carb._carb.Float3(torque), False)
+
 
     def start(self):
         """
