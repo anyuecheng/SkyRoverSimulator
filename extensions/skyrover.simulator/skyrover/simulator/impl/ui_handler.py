@@ -22,7 +22,7 @@ from skyrover.simulator.core.interface.skyrover_interface import SkyRoverInterfa
 from skyrover.simulator.core.backends import Backend, BackendConfig
 from skyrover.simulator.core.vehicles.multirotor_aerial import MultirotorAerialConfig, MultirotorAerial
 # from skyrover.simulator.core.vehicle_manager import VehicleManager
-# from pegasus.simulator.logic.graphical_sensors.monocular_camera import MonocularCamera
+from skyrover.simulator.core.graphical_sensors import MonocularCamera, Lidar
 
 try:
     from skyrover.simulator.core.backends import ROS2MultiRotorBackend, ROS2MultiRotorAerialBackendConfig, ROS2MultiRotorGroundBackendConfig
@@ -288,9 +288,11 @@ class UIHandler:
                     config_multirotor = MultirotorAerialConfig()
                     config_multirotor.stage_prefix = "quadrotor"
                     config_multirotor.backends = [backend]
-                    # config_multirotor.graphical_sensors = [MonocularCamera("camera", config={"update_rate": 60.0})]
+                    config_multirotor.graphical_sensors = [MonocularCamera("camera", config={"frequency": 30.0}), 
+                                                           Lidar("lidar", config={"frequency": 10.0, 
+                                                                                  "sensor_configuration": "OS1_REV6_32ch10hz2048res"})]
 
-                    # config_multirotor.test()
+                    config_multirotor.test()
 
                     # Try to spawn the selected robot in the world to the specified namespace
                     MultirotorAerial(

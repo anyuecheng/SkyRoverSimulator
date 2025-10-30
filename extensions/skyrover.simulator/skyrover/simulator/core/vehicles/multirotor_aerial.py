@@ -75,6 +75,9 @@ class MultirotorAerialConfig(ConfigYaml):
         for sensor in self.sensors:
             print("sensor:", sensor.sensor_type)
             print("sensor update_rate:", sensor.update_rate)
+        for sensor in self.graphical_sensors:
+            print("graphical_sensors:", sensor.sensor_type)
+            print("graphical_sensors update_rate:", sensor.update_rate)
         for backend in self.backends:
             print("backend:", type(backend))
             print("backend config:", backend.config.filename)
