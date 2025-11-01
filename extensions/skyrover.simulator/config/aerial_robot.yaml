@@ -1,6 +1,9 @@
+
+num_rotors: 4
+
+# ros2 backend
 stage_prefix: quadrotor
 usd_file: 
-num_rotors: 4
 rotor_constant:
 - 8.54858e-6
 - 8.54858e-6
@@ -34,3 +37,29 @@ use_barometer: true
 use_imu: true
 use_magnetometer: true
 use_gps: true
+
+# px4 backend
+connection_type: tcpin
+connection_ip: localhost
+connection_baseport: 14560
+enable_lockstep: true
+px4_autolaunch: false
+px4_dir: ~/PX4-Autopilot
+px4_vehicle_model: gazebo-classic_iris
+input_offset:
+- 0.0
+- 0.0
+- 0.0
+- 0.0
+input_scaling:
+- 1000.0
+- 1000.0
+- 1000.0
+- 1000.0
+zero_position_armed:
+- 100.0
+- 100.0
+- 100.0
+- 100.0
+update_rate: 250.0
+send_ground_truth: false

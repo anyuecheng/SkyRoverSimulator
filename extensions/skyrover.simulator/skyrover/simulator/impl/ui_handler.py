@@ -19,7 +19,7 @@ from skyrover.simulator.impl.params import SIMULATION_ENVIRONMENTS, WORLD_SETTIN
 from skyrover.simulator.core.interface.skyrover_interface import SkyRoverInterface
 
 # Vehicle Manager to spawn Vehicles
-from skyrover.simulator.core.backends import Backend, BackendConfig
+from skyrover.simulator.core.backends import Backend, BackendConfig, PX4MavlinkBackendConfig, PX4MavlinkBackend
 from skyrover.simulator.core.vehicles.multirotor_aerial import MultirotorAerialConfig, MultirotorAerial
 # from skyrover.simulator.core.vehicle_manager import VehicleManager
 from skyrover.simulator.core.graphical_sensors import MonocularCamera, Lidar
@@ -279,6 +279,10 @@ class UIHandler:
                         else:
                             carb.log_warn("ROS2 not available. Please run Isaac Sim with ROS 2 extension correctly enabled.")
                             return
+                    elif self._aerial_backend == BACKENDS["px4"]:  
+                        backend_config = PX4MavlinkBackendConfig(PX4MavlinkBackendConfig=self._vehicle_id)
+                        backend = PX4MavlinkBackend(config=backend_config)
+                        carb.log_warn("PX4 backend selected.")
                     else:
                         carb.log_warn("Invalid backend selected. Not spawning the vehicle.")
                         return
