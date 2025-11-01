@@ -280,7 +280,7 @@ class UIHandler:
                             carb.log_warn("ROS2 not available. Please run Isaac Sim with ROS 2 extension correctly enabled.")
                             return
                     elif self._aerial_backend == BACKENDS["px4"]:  
-                        backend_config = PX4MavlinkBackendConfig(PX4MavlinkBackendConfig=self._vehicle_id)
+                        backend_config = PX4MavlinkBackendConfig(vehicle_id=self._vehicle_id)
                         backend = PX4MavlinkBackend(config=backend_config)
                         carb.log_warn("PX4 backend selected.")
                     else:

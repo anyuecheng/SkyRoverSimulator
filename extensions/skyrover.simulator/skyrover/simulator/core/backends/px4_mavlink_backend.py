@@ -14,7 +14,7 @@ from skyrover.simulator.core.state import State
 from skyrover.simulator.core.backends.backend import Backend, BackendConfig
 from skyrover.simulator.core.interface.skyrover_interface import SkyRoverInterface
 from skyrover.simulator.core.backends.tools.px4_launch_tool import PX4LaunchTool
-from skyrover.simulator.impl.params import AERIAL_BACKEND_CONFIG, GROUND_BACKEND_CONFIG
+from skyrover.simulator.impl.params import AERIAL_ROBOT_CONFIG
 
 
 class SensorSource:
@@ -185,9 +185,9 @@ class PX4MavlinkBackendConfig(BackendConfig):
     An auxiliary data class used to store all the configurations for the mavlink communications.
     """
 
-    def __init__(self, c: int = 0, config_file: str = None):
+    def __init__(self, vehicle_id: int = 0, config_file: str = None):
         if config_file is None:
-            config_file = AERIAL_BACKEND_CONFIG
+            config_file = AERIAL_ROBOT_CONFIG
         super().__init__(config_file)
         """
         Initialize the PX4MavlinkBackendConfig class
@@ -261,7 +261,7 @@ class PX4MavlinkBackend(Backend):
             + ":"
             + self.config.get("connection_ip")
             + ":"
-            + str(self.config.get("connection_baseport") + self.config.vehicle_id)
+            + str(self.config.get("connection_baseport") + self.config.get("vehicle_id"))
         )
 
         # Check if we need to autolaunch px4 in the background or not
@@ -271,7 +271,7 @@ class PX4MavlinkBackend(Backend):
         self.px4_dir: str = self.config.get("px4_dir")
 
         # Set the update rate used for sending the messages (TODO - remove this hardcoded value from here)
-        self._update_rate: float = self.config.update_rate
+        self._update_rate: float = self.config.get("update_rate")
         self._time_step: float = 1.0 / self._update_rate  # s
 
         self._is_running: bool = False
@@ -574,7 +574,7 @@ class PX4MavlinkBackend(Backend):
         if self._connection is None:
             return 
 
-        carb.log_warn("Waiting for first hearbeat")
+        # carb.log_warn("Waiting for first hearbeat")
         result = self._connection.wait_heartbeat(blocking=False)
 
         if result is not None:
