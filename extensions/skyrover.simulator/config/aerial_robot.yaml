@@ -41,10 +41,10 @@ use_gps: true
 # px4 backend
 connection_type: tcpin
 connection_ip: 127.0.0.1
-connection_baseport: 14560
+connection_baseport: 25560
 enable_lockstep: true
-px4_autolaunch: false
-px4_dir: ~/PX4-Autopilot
+px4_autolaunch: true
+px4_dir: /home/fei/PX4-Autopilot
 px4_vehicle_model: gazebo-classic_iris
 input_offset:
 - 0.0

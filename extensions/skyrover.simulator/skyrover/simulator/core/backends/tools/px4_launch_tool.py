@@ -50,12 +50,12 @@ class PX4LaunchTool:
         self.px4_process = subprocess.Popen(
             [
                 self.px4_dir + "/build/px4_sitl_default/bin/px4",
-                "-s",
                 self.px4_dir + "/ROMFS/px4fmu_common/",
-                "-i",
+                "-s",
                 self.rc_script,
-                "-d",
+                "-i",
                 str(self.vehicle_id),
+                "-d",
             ],
             cwd=self.root_fs.name,
             shell=False,
