@@ -1,7 +1,7 @@
 
 num_rotors: 4
 
-# ros2 backend
+# vehicle config
 stage_prefix: quadrotor
 usd_file: 
 rotor_constant:
@@ -38,7 +38,31 @@ use_imu: true
 use_magnetometer: true
 use_gps: true
 
-# px4 backend
+# ros2 backend config
+accel_topic: state/accel
+gps_topic: sensors/gps
+gps_vel_topic: sensors/gps_vel
+imu_topic: sensors/imu
+mag_topic: sensors/mag
+namespace: vehicle
+pose_topic: state/pose
+pub_accel: true
+pub_gps: true
+pub_gps_vel: true
+pub_graphical_sensors: true
+pub_imu: true
+pub_mag: true
+pub_pose: true
+pub_sensors: true
+pub_state: true
+pub_tf: false
+pub_twist: true
+pub_twist_inertial: true
+sub_control: true
+twist_inertial_topic: state/twist_inertial
+twist_topic: state/twist
+
+# px4 backend config
 connection_type: tcpin
 connection_ip: 127.0.0.1
 connection_baseport: 25560

@@ -33,13 +33,13 @@ import omni.replicator.core as rep
 from isaacsim.ros2.bridge import read_camera_info
 
 from skyrover.simulator.core.backends.backend import Backend, BackendConfig
-from skyrover.simulator.impl.params import AERIAL_BACKEND_CONFIG, GROUND_BACKEND_CONFIG
+from skyrover.simulator.impl.params import AERIAL_ROBOT_CONFIG, GROUND_ROBOT_CONFIG
 
 
 class ROS2MultiRotorBackendConfig(BackendConfig):
     def __init__(self, config_file: str = None):
         if config_file is None:
-            config_file = AERIAL_BACKEND_CONFIG
+            config_file = AERIAL_ROBOT_CONFIG
         super().__init__(config_file)
 
         # self.set("num_rotors", 4)
@@ -74,14 +74,14 @@ class ROS2MultiRotorBackendConfig(BackendConfig):
 class ROS2MultiRotorAerialBackendConfig(BackendConfig):
     def __init__(self, config_file: str = None):
         if config_file is None:
-            config_file = AERIAL_BACKEND_CONFIG
+            config_file = AERIAL_ROBOT_CONFIG
         super().__init__(config_file)
 
 
 class ROS2MultiRotorGroundBackendConfig(BackendConfig):
     def __init__(self, config_file: str = None):
         if config_file is None:
-            config_file = GROUND_BACKEND_CONFIG
+            config_file = GROUND_ROBOT_CONFIG
         super().__init__(config_file)
 
 
