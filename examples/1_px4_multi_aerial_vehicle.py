@@ -21,11 +21,12 @@ import omni.timeline
 from omni.isaac.core.world import World
 
 # Import the Pegasus API for simulating drones
-from skyrover.simulator.impl.params import AERIAL_ROBOTS, NVIDIA_SIMULATION_ENVIRONMENTS
+from skyrover.simulator.impl.params import AERIAL_ROBOTS, SIMULATION_ENVIRONMENTS
 from skyrover.simulator.core.state import State
 from skyrover.simulator.core.backends.px4_mavlink_backend import PX4MavlinkBackend, PX4MavlinkBackendConfig
+from skyrover.simulator.core.backends.ros2_multirotor_backend import ROS2MultiRotorAerialBackendConfig, ROS2MultiRotorBackend
 from skyrover.simulator.core.vehicles.multirotor_aerial import MultirotorAerial, MultirotorAerialConfig
-from skyrover.simulator.core.interface.skyrover_interface import SkyroverInterface
+from skyrover.simulator.core.interface.skyrover_interface import SkyRoverInterface
 # Auxiliary scipy and numpy modules
 import os.path
 from scipy.spatial.transform import Rotation
@@ -45,7 +46,7 @@ class SkyApp:
         self.timeline = omni.timeline.get_timeline_interface()
 
         # Start the Pegasus Interface
-        self.sk = SkyroverInterface()
+        self.sk = SkyRoverInterface()
 
         # Acquire the World, .i.e, the singleton that controls that is a one stop shop for setting up physics,
         # spawning asset primitives, etc.
@@ -53,10 +54,10 @@ class SkyApp:
         self.world = self.sk.world
 
         # Launch one of the worlds provided by NVIDIA
-        self.sk.load_environment(NVIDIA_SIMULATION_ENVIRONMENTS["Curved Gridroom"])
+        self.sk.load_environment(SIMULATION_ENVIRONMENTS["Curved Gridroom"])
 
         # Spawn 5 vehicles with the PX4 control backend in the simulation, separated by 1.0 m along the x-axis
-        for i in range(5):
+        for i in range(1):
             self.vehicle_factory(i, gap_x_axis=1.0)
 
         # Reset the simulation environment so that all articulations (aka robots) are initialized
@@ -72,16 +73,18 @@ class SkyApp:
             vehicle_id (_type_): _description_
         """
 
-        # Create the vehicle
-        # Try to spawn the selected robot in the world to the specified namespace
         config_multirotor = MultirotorAerialConfig()
 
-        # Create the multirotor configuration
-        mavlink_config = PX4MavlinkBackendConfig(
-            vehicle_id
-        )
-        config_multirotor.backends = [PX4MavlinkBackend(mavlink_config)]
+        # mavlink_config = PX4MavlinkBackendConfig(vehicle_id)
+        # config_multirotor.backends = [PX4MavlinkBackend(mavlink_config)]
 
+        ros2_backend_config = ROS2MultiRotorAerialBackendConfig()
+        ros2_backend = ROS2MultiRotorBackend(vehicle_id=vehicle_id, config=ros2_backend_config)
+        config_multirotor.backends = [ros2_backend]
+
+        
+
+        print(AERIAL_ROBOTS['Iris'])
         MultirotorAerial(
             "/World/quadrotor",
             AERIAL_ROBOTS['Iris'],
