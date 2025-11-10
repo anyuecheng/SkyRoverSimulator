@@ -18,6 +18,8 @@ from skyrover.simulator.core.config_yaml import ConfigYaml
 from skyrover.simulator.impl.params import AERIAL_ROBOT_CONFIG
 
 # Sensors and dynamics setup
+from skyrover.simulator.core.graphical_sensors import MonocularCamera
+from skyrover.simulator.core.graphical_sensors import Lidar
 from skyrover.simulator.core.dynamics import LinearDrag
 from skyrover.simulator.core.thrusters import QuadraticThrustCurve
 from skyrover.simulator.core.sensors import Barometer, IMU, Magnetometer, GPS
@@ -52,6 +54,12 @@ class MultirotorAerialConfig(ConfigYaml):
 
         # The default graphical sensors for a quadrotor
         self.graphical_sensors = []
+        for element in self.get("camera_list"):
+            camera = MonocularCamera(element.get("camera_name"),config = element.get("camera_config"))
+            self.graphical_sensors.append(camera)
+        for element in self.get("lidar_list"):
+            lidar = Lidar(element.get("lidar_name"),config = element.get("lidar_config"))
+            self.graphical_sensors.append(lidar)
 
         # The default omnigraphs for a quadrotor
         self.graphs = []

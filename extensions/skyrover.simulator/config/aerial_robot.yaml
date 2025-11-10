@@ -38,6 +38,62 @@ use_imu: true
 use_magnetometer: true
 use_gps: true
 
+#lidar_config
+lidar_list:
+- lidar_name: lidar_01
+  lidar_config:
+    frequency: 10.0
+    sensor_configuration: OS1_REV6_32ch10hz2048res
+    position:
+    - 0.0
+    - 0.0
+    - 0.1
+    orientation:
+    - 0.0
+    - 0.0
+    - 0.0
+    show_render: True
+# - lidar_name: lidar_02
+#   lidar_config:
+#     frequency: 10.0
+#     sensor_configuration: OS1_REV6_32ch10hz2048res
+#     position:
+#     - 0.0
+#     - 0.0
+#     - 0.5
+#     orientation:
+#     - 0.0
+#     - 0.0
+#     - 0.0
+#     show_render: True
+
+#camera_config
+camera_list:
+- camera_name: camera_01
+  camera_config:
+    depth: false
+    position: 
+    - 1.0
+    - 0.0
+    - 2.0
+    orientation: 
+    - 0.0
+    - 0.0
+    - 0.0
+    frequency: 30
+- camera_name: camera_02
+  camera_config:
+    depth: false
+    position: 
+    - 1.0
+    - 0.0
+    - 3.0
+    orientation: 
+    - 0.0
+    - 0.0
+    - 0.0
+    frequency: 30
+
 # ros2 backend config
 accel_topic: state/accel
 gps_topic: sensors/gps

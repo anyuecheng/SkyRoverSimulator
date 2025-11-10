@@ -12,7 +12,7 @@ from isaacsim import SimulationApp
 # Start Isaac Sim's simulation environment
 # Note: this simulation app must be instantiated right after the SimulationApp import, otherwise the simulator will crash
 # as this is the object that will load all the extensions and load the actual simulator.
-simulation_app = SimulationApp({"headless": False})
+simulation_app = SimulationApp({"headless": True})
 
 # -----------------------------------
 # The actual script should start here
@@ -57,7 +57,7 @@ class SkyApp:
         self.sk.load_environment(SIMULATION_ENVIRONMENTS["Curved Gridroom"])
 
         # Spawn 5 vehicles with the PX4 control backend in the simulation, separated by 1.0 m along the x-axis
-        for i in range(1):
+        for i in range(3):
             self.vehicle_factory(i, gap_x_axis=1.0)
 
         # Reset the simulation environment so that all articulations (aka robots) are initialized
@@ -75,16 +75,27 @@ class SkyApp:
 
         config_multirotor = MultirotorAerialConfig()
 
-        # mavlink_config = PX4MavlinkBackendConfig(vehicle_id)
-        # config_multirotor.backends = [PX4MavlinkBackend(mavlink_config)]
-
-        ros2_backend_config = ROS2MultiRotorAerialBackendConfig()
-        ros2_backend = ROS2MultiRotorBackend(vehicle_id=vehicle_id, config=ros2_backend_config)
-        config_multirotor.backends = [ros2_backend]
-
+        mavlink_config = PX4MavlinkBackendConfig(vehicle_id)
+        config_multirotor.backends = [
+            PX4MavlinkBackend(mavlink_config),
+            ]
+        '''
+        test:
+        ROS2MultiRotorBackend(vehicle_id=1, 
+                            config={
+                            "namespace": 'drone', 
+                            "pub_sensors": False,
+                            "pub_graphical_sensors": True,
+                            "pub_state": True,
+                            "sub_control": False,})
+        '''
+        # ros2_backend_config = ROS2MultiRotorAerialBackendConfig()
+        # ros2_backend = ROS2MultiRotorBackend(vehicle_id=vehicle_id, config=ros2_backend_config)
+        # config_multirotor.backends = [ros2_backend]
+        
         
 
-        print(AERIAL_ROBOTS['Iris'])
+        #print(AERIAL_ROBOTS['Iris'])
         MultirotorAerial(
             "/World/quadrotor",
             AERIAL_ROBOTS['Iris'],
