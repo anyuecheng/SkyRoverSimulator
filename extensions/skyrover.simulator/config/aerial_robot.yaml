@@ -81,18 +81,18 @@ camera_list:
     - 0.0
     - 0.0
     frequency: 30
-- camera_name: camera_02
-  camera_config:
-    depth: false
-    position: 
-    - 1.0
-    - 0.0
-    - 3.0
-    orientation: 
-    - 0.0
-    - 0.0
-    - 0.0
-    frequency: 30
+# - camera_name: camera_02
+#   camera_config:
+#     depth: false
+#     position: 
+#     - 1.0
+#     - 0.0
+#     - 3.0
+#     orientation: 
+#     - 0.0
+#     - 0.0
+#     - 0.0
+#     frequency: 30
 
 # ros2 backend config
 accel_topic: state/accel

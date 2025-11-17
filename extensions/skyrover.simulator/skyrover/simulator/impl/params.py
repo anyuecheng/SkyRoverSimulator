@@ -27,7 +27,7 @@ ROBOTS_ASSETS = ASSET_PATH + "/Robots"
 AERIAL_ROBOTS = {"Iris": ROBOTS_ASSETS + "/Iris/iris.usd",
                  "aerial": ROBOTS_ASSETS + "/Iris/iris.usd"} 
 GROUND_ROBOTS = {"Iris": ROBOTS_ASSETS + "/Iris/iris.usd",
-                 "ground": ROBOTS_ASSETS + "/Iris/iris.usd"}
+                 "ground": ROBOTS_ASSETS + "/hunter_se/hunter_se_ctrl.usd"}
 
 # Setup the default simulation environments path
 NVIDIA_ASSETS_PATH = str(nucleus.get_assets_root_path())
