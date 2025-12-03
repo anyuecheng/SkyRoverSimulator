@@ -21,6 +21,7 @@ from skyrover.simulator.core.interface.skyrover_interface import SkyRoverInterfa
 # Vehicle Manager to spawn Vehicles
 from skyrover.simulator.core.backends import Backend, BackendConfig, PX4MavlinkBackendConfig, PX4MavlinkBackend
 from skyrover.simulator.core.vehicles.multirotor_aerial import MultirotorAerialConfig, MultirotorAerial
+from skyrover.simulator.core.vehicles.multirotor_ground import MultirotorGroundConfig, MultirotorGround
 # from skyrover.simulator.core.vehicle_manager import VehicleManager
 from skyrover.simulator.core.graphical_sensors import MonocularCamera, Lidar
 
@@ -287,14 +288,14 @@ class UIHandler:
                         carb.log_warn("Invalid backend selected. Not spawning the vehicle.")
                         return
                     
-                    
+
                     # Create the multirotor configuration
                     config_multirotor = MultirotorAerialConfig()
                     config_multirotor.stage_prefix = "quadrotor"
                     config_multirotor.backends = [backend]
-                    config_multirotor.graphical_sensors = [MonocularCamera("camera", config={"frequency": 30.0}), 
-                                                           Lidar("lidar", config={"frequency": 10.0, 
-                                                                                  "sensor_configuration": "OS1_REV6_32ch10hz2048res"})]
+                    # config_multirotor.graphical_sensors = [MonocularCamera("camera", config={"frequency": 30.0}), 
+                    #                                        Lidar("lidar", config={"frequency": 10.0, 
+                    #                                                               "sensor_configuration": "OS1_REV6_32ch10hz2048res"})]
 
                     config_multirotor.test()
 
@@ -315,11 +316,52 @@ class UIHandler:
 
                     aerial_position[aerial_spawn_axis] += aerial_spawn_distance
 
+                for i in range(self._ground_vehicle_num):
+                    self._vehicle_id += 1
 
+                    backend_config: BackendConfig = None
+                    backend: Backend = None
+
+                    if self._ground_backend == BACKENDS["ros2"]:  
+                        if ROS2_available:
+                            backend_config = ROS2MultiRotorGroundBackendConfig()
+                            backend = ROS2MultiRotorBackend(vehicle_id=self._vehicle_id, config=backend_config)
+                            carb.log_warn("ROS2 backend selected for ground vehicle.")
+                        else:
+                            carb.log_warn("ROS2 not available. Please run Isaac Sim with ROS 2 extension correctly enabled.")
+                            return
+                    else:
+                        carb.log_warn("Invalid backend selected. Not spawning the vehicle.")
+                        return
+                
+                    # Create the multirotor configuration
+                    config_multirotor = MultirotorGroundConfig()
+                    config_multirotor.stage_prefix = "hunter_se_description"
+                    config_multirotor.backends = [backend]
+
+                    config_multirotor.test()
+
+                    # Try to spawn the selected robot in the world to the specified namespace
+                    MultirotorGround(
+                        "/World/Root",
+                        GROUND_ROBOTS[selected_ground_robot],
+                        self._vehicle_id,
+                        ground_position,
+                        Rotation.from_euler("XYZ", ground_oritation, degrees=True).as_quat(),
+                        config=config_multirotor,
+                    )
+
+                    print("Spawning ground vehicle: " + selected_ground_robot)
+                    print("Spawning ground vehicle with backend: " + self._ground_backend)
+                    print("Spawning ground vehicle number: " + str(self._ground_vehicle_num))
+                    print("at position: " + str(ground_position) + " and orientation: " + str(ground_oritation))
+
+                    ground_position[ground_spawn_axis] += ground_spawn_distance
 
 
                     
-                carb.log_info("Spawned the " + str(self._aerial_vehicle_num) + " robots: " + selected_aerial_robot)  
+                carb.log_info("Spawned the " + str(self._aerial_vehicle_num) + " robots: " + selected_aerial_robot)
+                carb.log_info("Spawned the " + str(self._ground_vehicle_num) + " robots: " + selected_ground_robot)  
             else:
                 carb.log_error("Could not spawn the robot using the SkyRover Simulator UI")
 

@@ -29,6 +29,39 @@ class QuadraticThrustCurve(ThrustCurve):
             >>> }
         """
 
+        '''
+
+        # --- 步骤 1: 读取基础物理参数  ---
+        # 如果 ConfigYaml 没有这些参数，我们使用合理的默认值
+        self._C_T = config.get("prop_C_T", 0.1)        # 推力系数 C_T
+        self._C_Q = config.get("prop_C_Q", 0.008)       # 扭矩系数 C_Q
+        self._diameter = config.get("prop_diameter", 0.203) # 螺旋桨直径 D (m, 8英寸)
+        self._air_density = config.get("air_density", 1.225) # 空气密度 rho (kg/m^3)
+
+        # --- 步骤 2: 推导物理常数 K_F 和 K_M (实现物理一致性) ---
+        
+        # 转换为 rad/s 系统的常数因子:1 / (2*pi)^2 = 1 / (4*pi^2)
+        RAD_S_FACTOR = 1.0 / (4 * np.pi**2) 
+
+        # 计算 K_F (推力常数): K_F = C_T * rho * D^4 / (4*pi^2)
+        K_F_PHYS = self._C_T * self._air_density * (self._diameter**4) * RAD_S_FACTOR
+
+        # 计算 K_M (滚转力矩常数): K_M = C_Q * rho * D^5 / (4*pi^2)
+        K_M_PHYS = self._C_Q * self._air_density * (self._diameter**5) * RAD_S_FACTOR
+
+        # --- 步骤 3: 使用推导出的 K_F 和 K_M 覆盖经验常数 ---
+        
+        # K_F (推力常数): T = rotor_constant * omega^2
+        # 我们使用 K_F_PHYS 覆盖 YAML 中可能存在的旧值
+        self._rotor_constant = [K_F_PHYS] * self._num_rotors
+        assert len(self._rotor_constant) == self._num_rotors
+
+        # K_M (滚转力矩系数): 用于计算总偏航力矩
+        # 我们使用 K_M_PHYS 覆盖 YAML 中可能存在的旧值
+        self._rolling_moment_coefficient = [K_M_PHYS] * self._num_rotors
+        assert len(self._rolling_moment_coefficient) == self._num_rotors
+
+        '''
         # Get the total number of rotors to simulate
         self._num_rotors = config.get("num_rotors", 4)
 

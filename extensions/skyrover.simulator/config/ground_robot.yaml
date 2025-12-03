@@ -3,7 +3,7 @@
 
 # vehicle config
 stage_prefix: hunter_se_description
-usd_file: /mnt/disk6_1/fei/SkyRoverSimulator/extensions/skyrover.simulator/skyrover/simulator/assets/Robots/only hunter se/only hunter se.usd
+usd_file: /mnt/disk6_1/fei/SkyRoverSimulator/extensions/skyrover.simulator/skyrover/simulator/assets/Robots/hunter_se/hunter_se_ctrl.usd
 
 use_imu: true
 use_gps: true
@@ -15,8 +15,8 @@ lidar_list:
     frequency: 10.0
     sensor_configuration: OS1_REV6_32ch10hz2048res
     position:
-    - 0.0
-    - 0.0
+    - 0.4
+    - -0.05
     - 0.1
     orientation:
     - 0.0
@@ -43,13 +43,13 @@ camera_list:
   camera_config:
     depth: false
     position: 
-    - 1.0
-    - 0.0
-    - 2.0
+    - 0.4
+    - 0.05
+    - 0.06
     orientation: 
     - 0.0
     - 0.0
-    - 0.0
+    - 180.0
     frequency: 30
 # - camera_name: camera_02
 #   camera_config:
@@ -61,7 +61,7 @@ camera_list:
 #     orientation: 
 #     - 0.0
 #     - 0.0
-#     - 0.0
+#     - 180.0
 #     frequency: 30
 
 # ros2 backend config

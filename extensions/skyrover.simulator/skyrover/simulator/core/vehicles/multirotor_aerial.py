@@ -54,12 +54,15 @@ class MultirotorAerialConfig(ConfigYaml):
 
         # The default graphical sensors for a quadrotor
         self.graphical_sensors = []
-        for element in self.get("camera_list"):
-            camera = MonocularCamera(element.get("camera_name"),config = element.get("camera_config"))
-            self.graphical_sensors.append(camera)
-        for element in self.get("lidar_list"):
-            lidar = Lidar(element.get("lidar_name"),config = element.get("lidar_config"))
-            self.graphical_sensors.append(lidar)
+        if self.get("camera_list") is not None:
+            for element in self.get("camera_list"):
+                camera = MonocularCamera(element.get("camera_name"),config = element.get("camera_config"))
+                self.graphical_sensors.append(camera)
+
+        if self.get("lidar_list") is not None:
+            for element in self.get("lidar_list"):
+                lidar = Lidar(element.get("lidar_name"),config = element.get("lidar_config"))
+                self.graphical_sensors.append(lidar)
 
         # The default omnigraphs for a quadrotor
         self.graphs = []

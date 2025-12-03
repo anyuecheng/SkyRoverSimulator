@@ -275,6 +275,7 @@ class SkyRoverWindow(ui.Window):
                                     dropdown_menu = ui.ComboBox(0, name="backends")
                                     for backend in BACKENDS:
                                         dropdown_menu.model.append_child_item(None, ui.SimpleStringModel(backend))
+                                        break
                                     self._handler.set_ground_vehicle_backend_dropdown(dropdown_menu.model)
 
                                 with ui.HStack():
