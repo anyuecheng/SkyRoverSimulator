@@ -32,6 +32,19 @@ class MultirotorAerialConfig(ConfigYaml):
 
         # Stage prefix of the vehicle when spawning in the world
         self.stage_prefix = self.get("stage_prefix", "quadrotor")
+        # --- START: 新增电气和物理参数 (用于功率模型) ---
+        self.kv = self.get("kv", 1000) 
+        self.k_t = 60 / (2 * np.pi * self.kv)             # K_t (Nm/A)
+        self.resistance = self.get("resistance_motor", 0.25) # R_motor (Ohm)
+        self.io_current = self.get("io_current", 0.4)     # I_o (A)
+        self.esc_efficiency = self.get("esc_efficiency", 0.95)
+        self.V_full = self.get("battery_v_full", 16.8)    # 4S 满电电压 (V)
+        self.R_internal = self.get("resistance_internal", 0.03) # R_internal (Ohm)
+        self.base_power_electronics = self.get("base_power_electronics", 5.0) # 基础电子功耗 (W)
+        self.C_Q = self.get("prop_C_Q", 0.01)            # 螺旋桨扭矩系数
+        self.diameter = self.get("prop_diameter", 0.203)  # 螺旋桨直径 (m, 8英寸)
+        self.air_density = self.get("air_density", 1.225) # 空气密度 (kg/m^3)
+        # --- END: 新增电气和物理参数 ---
 
         # The USD file that describes the visual aspect of the vehicle (and some properties such as mass and moments of inertia)
         self.usd_file = self.get("usd_file", "")
@@ -126,6 +139,18 @@ class MultirotorAerial(Vehicle):
         # 2. Setup the dynamics of the system - get the thrust curve of the vehicle from the configuration
         self._thrusters = config.thrust_curve
         self._drag = config.drag
+        self.total_current = 0.0
+        # --- START: 新增功率模型状态和配置引用 ---
+        self._power_config = config
+        self._instantaneous_power_W = 0.0  # 瞬时总功率 (W)
+        self._total_energy_J = 0.0         # 累积总能量 (J)
+        self._V_actual = self._power_config.V_full # 实际电池端电压 (V)
+        
+        # 预计算扭矩的物理常数部分 Q = K_Q_phys * omega^2
+        self._K_Q_phys = (self._power_config.C_Q * self._power_config.air_density * (self._power_config.diameter**5)) / (4*np.pi**2)
+        
+        # --- END: 新增功率模型状态和配置引用 ---
+
 
     def start(self):
         """In this case we do not need to do anything extra when the simulation starts"""
@@ -134,6 +159,109 @@ class MultirotorAerial(Vehicle):
     def stop(self):
         """In this case we do not need to do anything extra when the simulation stops"""
         pass
+    
+    def get_body_velocity(self) -> np.ndarray:
+        """
+        获取机体坐标系下的瞬时线性速度向量 [vx, vy, vz]。
+        
+        Returns:
+            np.ndarray: 3x1 速度向量 (m/s)
+        """
+        # 1. 优先从内部状态对象获取
+        if self._state is not None:
+            # 根据 State 类的定义，self._state.linear_body_velocity 
+            # 存储的就是 FLU 身体坐标系下的速度 [u, v, w]
+            return self._state.linear_body_velocity
+        else:
+            # 2. 如果 _state 丢失，这是严重的系统错误。
+            # 为了防止程序崩溃，我们返回零，但必须发出警告。
+            # 注意：在实际运行中，如果 _state 丢失，这会导致阻力计算错误。
+            print(f"⚠️ Warning: self._state is None. Cannot retrieve body velocity. Returning 0.")
+            return np.array([0.0, 0.0, 0.0]) 
+
+     # --- 新增方法: 计算瞬时功率 ---
+
+    def _calculate_instantaneous_power(self, desired_rotor_velocities: list, dt: float):
+        """
+        根据期望转速计算瞬时功率消耗，使用物理电机/电池模型。
+        """
+        
+        total_ideal_current = 0.0
+        
+        # --- 步骤 1: 计算总“期望”电流 (假设所有电机都可达) ---
+        # 存储每个电机的中间计算值，以便在步骤 3 中复用
+        motor_calcs = []
+        
+        for omega in desired_rotor_velocities:
+            motor_torque_needed = self._K_Q_phys * (omega**2)
+            I_prop_needed = motor_torque_needed / self._power_config.k_t
+            I_single_ideal = I_prop_needed + (self._power_config.io_current if omega > 0.1 else 0)
+            
+            V_bemf = self._power_config.k_t * omega
+            V_required_motor = V_bemf + I_single_ideal * self._power_config.resistance
+            
+            motor_calcs.append({
+                'omega': omega,
+                'I_single_ideal': I_single_ideal,
+                'I_prop_needed': I_prop_needed,
+                'V_bemf': V_bemf,
+                'V_required_motor': V_required_motor
+            })
+            
+            total_ideal_current += I_single_ideal
+
+        # --- 步骤 2: 计算“实际”电池电压 (基于总期望电流) ---
+        I_total_system = total_ideal_current
+        self.total_current = total_ideal_current
+        V_actual = self._power_config.V_full - I_total_system * self._power_config.R_internal
+        
+        total_power_motor = 0.0
+        print(self._K_Q_phys)
+        print(self._thrusters._rotor_constant[0],self._thrusters._rotor_constant[1],self._thrusters._rotor_constant[2],self._thrusters._rotor_constant[3])
+        print(self._thrusters._rolling_moment_coefficient[0],self._thrusters._rolling_moment_coefficient[1],self._thrusters._rolling_moment_coefficient[2],self._thrusters._rolling_moment_coefficient[3])
+        # --- 步骤 3: 检查可达性并计算每个电机的实际功率 ---
+        for calc in motor_calcs:
+            
+            P_in_motor_single = 0.0 # 初始化此电机的功率
+
+            if V_actual < calc['V_required_motor']:
+                 # --- START: 降级计算逻辑 ---
+                 # 警告: 电机无法达到所需转速（因为电压不足）
+                 rpm_unreachable = calc['omega'] * 60 / (2 * np.pi)
+                 print(f"⚠️ Power Warning: Motor required V {calc['V_required_motor']:.2f}V exceeds available V {V_actual:.2f}V (Target RPM: {rpm_unreachable:.0f})!")
+                 
+                 # 重新计算该电机在 V_actual 限制下的实际扭矩电流
+                 # I_prop_limited = (V_actual - V_bemf) / R_motor
+                 I_prop_limited = (V_actual - calc['V_bemf']) / self._power_config.resistance
+                 # 确保电流不为负（如果 V_bemf > V_actual，说明电机在反向制动）
+                 I_prop_limited = max(0, I_prop_limited) 
+                 
+                 I_single_actual = I_prop_limited + (self._power_config.io_current if calc['omega'] > 0.1 else 0)
+                 
+                 # 功率 P = V * I (使用实际电压和受限后的实际电流)
+                 P_in_motor_single = V_actual * I_single_actual
+                 # --- END: 降级计算逻辑 ---
+
+            else:
+                # --- 正常计算逻辑 ---
+                # 电压充足，使用步骤 1 中计算的理想电流
+                P_in_motor_single = calc['V_required_motor'] * calc['I_single_ideal']
+                # --- END: 正常计算逻辑 ---
+            
+            total_power_motor += P_in_motor_single
+            
+        # --- 步骤 4: 计算系统总功率 ---
+        battery_power_total = total_power_motor / self._power_config.esc_efficiency
+        total_system_power = battery_power_total + self._power_config.base_power_electronics
+        
+        # --- 步骤 5: 更新内部状态和能量 (积分) ---
+        self._instantaneous_power_W = total_system_power
+        self._total_energy_J += total_system_power * dt
+        self._V_actual = V_actual # 存储当前步的实际电压
+        
+        return total_system_power, V_actual
+
+
 
     def update(self, dt: float):
         """
@@ -153,6 +281,18 @@ class MultirotorAerial(Vehicle):
             desired_rotor_velocities = self._backends[0].input_reference()
         else:
             desired_rotor_velocities = [0.0 for i in range(self._thrusters._num_rotors)]
+
+        # --- 新增: 在应用推力前计算功率 ---
+        self._calculate_instantaneous_power(desired_rotor_velocities, dt)
+        
+        # 您现在可以通过 self._instantaneous_power_W 访问瞬时功率，
+        # 并且 self._total_energy_J 储存了累积能耗。
+        for omega in desired_rotor_velocities:
+            print(f"omega: {omega}rad/s")
+        print(f"total_current:{self.total_current}")
+        print(f"actual V:{self._V_actual}")
+        print(f"P: {self._instantaneous_power_W:.1f} W, E: {self._total_energy_J:.1f} J") # 可选的调试输出
+        # ------------------------------------
 
         # Input the desired rotor velocities in the thruster model
         self._thrusters.set_input_reference(desired_rotor_velocities)
@@ -180,6 +320,7 @@ class MultirotorAerial(Vehicle):
         # Call the update methods in all backends
         for backend in self._backends:
             backend.update(dt)
+
 
 
     def handle_propeller_visual(self, rotor_number, force: float, articulation):
@@ -309,3 +450,4 @@ class MultirotorAerial(Vehicle):
         ang_vel = np.sqrt(squared_ang_vel)
 
         return ang_vel
+    

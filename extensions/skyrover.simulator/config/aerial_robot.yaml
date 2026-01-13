@@ -38,6 +38,19 @@ use_imu: true
 use_magnetometer: true
 use_gps: true
 
+prop_C_T : 0.1        # 推力系数 C_T
+prop_C_Q : 0.01       # 扭矩系数 C_Q
+prop_diameter : 0.203 # 螺旋桨直径 D (m, 8英寸)
+air_density : 1.225   # 空气密度 rho (kg/m^3)
+
+kv : 1000
+resistance_motor : 0.05 # R_motor (Ohm)
+io_current : 0.4        # I_o (A)
+esc_efficiency : 0.95
+battery_v_full : 16.8   # 4S 满电电压 (V)
+resistance_internal : 0.03 # R_internal (Ohm)
+base_power_electronics : 5.0 # 基础电子功耗 (W)
+
 #lidar_config
 lidar_list:
 - lidar_name: lidar_01

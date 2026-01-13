@@ -29,12 +29,15 @@ class QuadraticThrustCurve(ThrustCurve):
             >>> }
         """
 
-        '''
+        # Get the total number of rotors to simulate
+        self._num_rotors = config.get("num_rotors", 4)
 
+
+        
         # --- 步骤 1: 读取基础物理参数  ---
         # 如果 ConfigYaml 没有这些参数，我们使用合理的默认值
         self._C_T = config.get("prop_C_T", 0.1)        # 推力系数 C_T
-        self._C_Q = config.get("prop_C_Q", 0.008)       # 扭矩系数 C_Q
+        self._C_Q = config.get("prop_C_Q", 0.01)       # 扭矩系数 C_Q
         self._diameter = config.get("prop_diameter", 0.203) # 螺旋桨直径 D (m, 8英寸)
         self._air_density = config.get("air_density", 1.225) # 空气密度 rho (kg/m^3)
 
@@ -62,19 +65,16 @@ class QuadraticThrustCurve(ThrustCurve):
         assert len(self._rolling_moment_coefficient) == self._num_rotors
 
         '''
-        # Get the total number of rotors to simulate
-        self._num_rotors = config.get("num_rotors", 4)
-
         # The rotor constant used for computing the total thrust produced by the rotor: T = rotor_constant * omega^2
         self._rotor_constant = config.get("rotor_constant", [8.54858e-6, 8.54858e-6, 8.54858e-6, 8.54858e-6])
         # print(self._rotor_constant)
         assert len(self._rotor_constant) == self._num_rotors
-
+        
         # The rotor constant used for computing the total torque generated about the vehicle Z-axis
         self._rolling_moment_coefficient = config.get("rolling_moment_coefficient", [1e-6, 1e-6, 1e-6, 1e-6])
         # print(self._rolling_moment_coefficient)
         assert len(self._rolling_moment_coefficient) == self._num_rotors
-
+        '''
         # Save the rotor direction of rotation
         self._rot_dir = config.get("rot_dir", [-1, -1, 1, 1])
         # print(self._rot_dir)
