@@ -34,9 +34,11 @@ NVIDIA_ASSETS_PATH = str(nucleus.get_assets_root_path())
 ISAAC_SIM_ENVIRONMENTS = "/Isaac/Environments"
 NVIDIA_SIMULATION_ENVIRONMENTS = {
     "Default Environment": "Grid/default_environment.usd",
+    "s_test": "Simple_Warehouse/sxformwithlight.usd",
+    "b_test": "Simple_Warehouse/bxformwithlight.usd",
+    "new_environment":"Simple_Warehouse/generated_0.usd",
     "Black Gridroom": "Grid/gridroom_black.usd",
     "Curved Gridroom": "Grid/gridroom_curved.usd",
-    "Warehouse with generation": "Simple_Warehouse/generation.usd",
     "Hospital": "Hospital/hospital.usd",
     "Office": "Office/office.usd",
     "Simple Room": "Simple_Room/simple_room.usd",

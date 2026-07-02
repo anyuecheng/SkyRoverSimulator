@@ -89,22 +89,22 @@ class MultirotorAerialConfig(ConfigYaml):
     def test(self):
         """Test method to verify if the configuration is valid
         """
-        print("stage_prefix:", self.stage_prefix)
-        print("usd_file:", self.usd_file)
-        print("thrust_curve.rot_dir:", self.thrust_curve.rot_dir)
-        print("thrust_curve.rolling_moment:", self.thrust_curve.rolling_moment)
-        print("thrust_curve.velocity:", self.thrust_curve.velocity)
-        print("thrust_curve.force:", self.thrust_curve.force)
-        print("drag:", self.drag.drag)
-        for sensor in self.sensors:
-            print("sensor:", sensor.sensor_type)
-            print("sensor update_rate:", sensor.update_rate)
-        for sensor in self.graphical_sensors:
-            print("graphical_sensors:", sensor.sensor_type)
-            print("graphical_sensors update_rate:", sensor.update_rate)
-        for backend in self.backends:
-            print("backend:", type(backend))
-            print("backend config:", backend.config.filename)
+        # print("stage_prefix:", self.stage_prefix)
+        # print("usd_file:", self.usd_file)
+        # print("thrust_curve.rot_dir:", self.thrust_curve.rot_dir)
+        # print("thrust_curve.rolling_moment:", self.thrust_curve.rolling_moment)
+        # print("thrust_curve.velocity:", self.thrust_curve.velocity)
+        # print("thrust_curve.force:", self.thrust_curve.force)
+        # print("drag:", self.drag.drag)
+        # for sensor in self.sensors:
+        #     print("sensor:", sensor.sensor_type)
+        #     print("sensor update_rate:", sensor.update_rate)
+        # for sensor in self.graphical_sensors:
+        #     print("graphical_sensors:", sensor.sensor_type)
+        #     print("graphical_sensors update_rate:", sensor.update_rate)
+        # for backend in self.backends:
+        #     print("backend:", type(backend))
+        #     print("backend config:", backend.config.filename)
 
 
 class MultirotorAerial(Vehicle):
@@ -216,9 +216,19 @@ class MultirotorAerial(Vehicle):
         V_actual = self._power_config.V_full - I_total_system * self._power_config.R_internal
         
         total_power_motor = 0.0
-        print(self._K_Q_phys)
-        print(self._thrusters._rotor_constant[0],self._thrusters._rotor_constant[1],self._thrusters._rotor_constant[2],self._thrusters._rotor_constant[3])
-        print(self._thrusters._rolling_moment_coefficient[0],self._thrusters._rolling_moment_coefficient[1],self._thrusters._rolling_moment_coefficient[2],self._thrusters._rolling_moment_coefficient[3])
+        # print(self._K_Q_phys)
+        # print(self._thrusters._rotor_constant[0],self._thrusters._rotor_constant[1],self._thrusters._rotor_constant[2],self._thrusters._rotor_constant[3])
+        # print(self._thrusters._rolling_moment_coefficient[0],self._thrusters._rolling_moment_coefficient[1],self._thrusters._rolling_moment_coefficient[2],self._thrusters._rolling_moment_coefficient[3])
+
+        print(f"[K_Q_phys] {self._K_Q_phys}")
+
+        for i in range(4):
+            print(
+                f"[Motor {i}] "
+                f"rotor_constant={self._thrusters._rotor_constant[i]:.8e}, "
+                f"rolling_moment_coefficient={self._thrusters._rolling_moment_coefficient[i]:.8e}"
+            )
+            
         # --- 步骤 3: 检查可达性并计算每个电机的实际功率 ---
         for calc in motor_calcs:
             

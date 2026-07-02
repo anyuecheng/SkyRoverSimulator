@@ -123,9 +123,9 @@ class MultirotorGround(Vehicle):
         full_prefix = stage_prefix + str(vehicle_id)
         super().__init__(full_prefix, usd_file, init_pos, init_orientation, config.sensors, config.graphical_sensors, config.graphs, config.backends)
 
-        prim = get_prim_at_path(self._stage_prefix + "/hunter_se_description")
-        prim.GetAttribute("isaac:namespace").Set(config.get("namespace", "vehicle")  + str(vehicle_id))
-
+        prim = get_prim_at_path(self._stage_prefix+"/hunter_se_description")
+        
+        # prim.GetAttribute("isaac:namespace").Set(config.get("namespace", "vehicle")  + str(vehicle_id))
         # 2. Setup the dynamics of the system - get the thrust curve of the vehicle from the configuration
         # self._thrusters = config.thrust_curve
         # self._drag = config.drag

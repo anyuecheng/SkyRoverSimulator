@@ -124,7 +124,7 @@ pub_mag: true
 pub_pose: true
 pub_sensors: true
 pub_state: true
-pub_tf: false
+pub_tf: true
 pub_twist: true
 pub_twist_inertial: true
 sub_control: true
@@ -134,7 +134,7 @@ twist_topic: state/twist
 # px4 backend config
 connection_type: tcpin
 connection_ip: 127.0.0.1
-connection_baseport: 25560
+connection_baseport: 4560
 enable_lockstep: true
 px4_autolaunch: true
 px4_dir: /home/fei/PX4-Autopilot

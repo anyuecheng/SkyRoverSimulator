@@ -294,7 +294,10 @@ class Vehicle(Robot):
 
             # Initialize the graphical sensors
             for graphical_sensor in self._graphical_sensors:
-                graphical_sensor.start()
+                try:
+                    graphical_sensor.start()
+                except Exception as e:
+                    print(f"Warning: Failed to start sensor {graphical_sensor}: {e}")
 
             # Intializes the communication with all the backends. This method is invoked automatically when the simulation starts
             for backend in self._backends:

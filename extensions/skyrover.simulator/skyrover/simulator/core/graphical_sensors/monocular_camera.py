@@ -91,28 +91,31 @@ class MonocularCamera(GraphicalSensor):
         self._camera.set_local_pose(np.array(self._position), Rotation.from_euler("ZYX", self._orientation, degrees=True).as_quat())
         
     def start(self):
+        try:
+            # Set the camera intrinsics
+            ((fx,_,cx),(_,fy,cy),(_,_,_)) = self._intrinsics
 
-        # Set the camera intrinsics
-        ((fx,_,cx),(_,fy,cy),(_,_,_)) = self._intrinsics
+            # Start the camera
+            self._camera.initialize()
 
-        # Start the camera
-        self._camera.initialize()
+            # Set the correct properties of the camera (this must be done after the camera object is initialized)
+            #self._camera.set_projection_type("pinhole")
+            #self._camera.set_projection_type("fisheyePolynomial")  # # f-theta model, to approximate the fisheye model
+            #self._camera.set_rational_polynomial_properties(self._resolution[0], self._resolution[1], cx, cy, self._diagonal_fov, self._distortion_coefficients)
+            #self._camera.set_clipping_range(0.05, 100.0)
 
-        # Set the correct properties of the camera (this must be done after the camera object is initialized)
-        #self._camera.set_projection_type("pinhole")
-        #self._camera.set_projection_type("fisheyePolynomial")  # # f-theta model, to approximate the fisheye model
-        #self._camera.set_rational_polynomial_properties(self._resolution[0], self._resolution[1], cx, cy, self._diagonal_fov, self._distortion_coefficients)
-        #self._camera.set_clipping_range(0.05, 100.0)
+            # Check if depth is enabled, if so, set the depth properties
+            if self._depth:
+                self._camera.add_distance_to_image_plane_to_frame()
 
-        # Check if depth is enabled, if so, set the depth properties
-        if self._depth:
-            self._camera.add_distance_to_image_plane_to_frame()
-
-        # Signal that the camera is fully set
-        self._camera_full_set = True
-
-    def stop(self):
-        self._camera_full_set = False
+            # Signal that the camera is fully set
+            self._camera_full_set = True
+        
+        except Exception as e:
+            if "ReferenceTime" in str(e):
+                self._camera_full_set = False
+            else:
+                self._camera_full_set = False
 
     @property
     def state(self):

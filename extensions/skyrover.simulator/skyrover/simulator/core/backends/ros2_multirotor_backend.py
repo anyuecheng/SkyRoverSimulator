@@ -11,6 +11,7 @@ enable_extension("isaacsim.ros2.bridge")
 
 # ROS2 imports
 import rclpy
+from rclpy.parameter import Parameter
 from std_msgs.msg import Float64
 from geometry_msgs.msg import TransformStamped
 from sensor_msgs.msg import Imu, MagneticField, NavSatFix, NavSatStatus
@@ -113,7 +114,7 @@ class ROS2MultiRotorBackend(Backend):
             pass
 
         self.node = rclpy.create_node("simulator_vehicle_" + str(vehicle_id))
-
+        self.node.set_parameters([Parameter('use_sim_time',Parameter.Type.BOOL,True)])
         # Initialize the publishers and subscribers
         self.initialize_publishers(config)
         self.initialize_subscribers()
@@ -422,7 +423,7 @@ class ROS2MultiRotorBackend(Backend):
         if data["lidar_name"] not in self.graphical_sensors_writers:
             self.add_lidar_writter(data)
 
-
+    '''
     def add_lidar_writter(self, data):
 
         # List all the available writers: print(rep.writers.WriterRegistry._writers)
@@ -441,6 +442,105 @@ class ROS2MultiRotorBackend(Backend):
         writer.initialize(nodeNamespace=self._namespace, topicName=data["lidar_name"] + "/laserscan", frameId=data["lidar_name"])
         writer.attach([render_prod_path])
         self.graphical_sensors_writers[data["lidar_name"]].append(writer)
+
+    '''
+
+
+    # gai ban1
+    # def add_lidar_writter(self, data):
+    #     import math
+
+    #     # List all the available writers: print(rep.writers.WriterRegistry._writers)
+    #     render_prod_path = rep.create.render_product(data["stage_prim_path"], [1, 1], name=data["lidar_name"])
+
+    #     # Create the writer for the lidar
+    #     writer_pc = rep.writers.get("RtxLidarROS2PublishPointCloud")
+    #     writer_pc.initialize(nodeNamespace=self._namespace, topicName=data["lidar_name"] + "/pointcloud", frameId=data["lidar_name"])
+    #     writer_pc.attach([render_prod_path])
+
+    #     # Add the writer to the dictionary
+    #     self.graphical_sensors_writers[data["lidar_name"]] = [writer_pc]
+
+    #     # Create the writer for publishing a laser scan message along with the point cloud
+    #     writer_scan = rep.writers.get("RtxLidarROS2PublishLaserScan")
+    #     writer_scan.initialize(nodeNamespace=self._namespace, topicName=data["lidar_name"] + "/laserscan", frameId=data["lidar_name"])
+    #     writer_scan.attach([render_prod_path])
+    #     self.graphical_sensors_writers[data["lidar_name"]].append(writer_scan)
+
+    #     # --------------------------------------------------------------------------------
+    #     # [NEW] Publish static TF to link the vehicle's base_link to the lidar frame
+    #     # --------------------------------------------------------------------------------
+    #     if self._pub_tf:
+    #         t = TransformStamped()
+    #         t.header.stamp = self.node.get_clock().now().to_msg()
+            
+    #         # The parent frame is the drone's body
+    #         t.header.frame_id = self._namespace + '_' + 'base_link'
+    #         # The child frame must match the frameId used in the writer
+    #         t.child_frame_id = data["lidar_name"]
+
+    #         # Parse position from config data
+    #         pos = data.get("position", [0.0, 0.0, 0.0])
+    #         t.transform.translation.x = float(pos[0])
+    #         t.transform.translation.y = float(pos[1])
+    #         t.transform.translation.z = float(pos[2])
+
+    #         # Parse orientation (Euler degrees) from config data and convert to Quaternion
+    #         ori = data.get("orientation", [0.0, 0.0, 0.0])
+    #         roll = math.radians(ori[0])
+    #         pitch = math.radians(ori[1])
+    #         yaw = math.radians(ori[2])
+
+    #         cy = math.cos(yaw * 0.5)
+    #         sy = math.sin(yaw * 0.5)
+    #         cp = math.cos(pitch * 0.5)
+    #         sp = math.sin(pitch * 0.5)
+    #         cr = math.cos(roll * 0.5)
+    #         sr = math.sin(roll * 0.5)
+
+    #         t.transform.rotation.w = cr * cp * cy + sr * sp * sy
+    #         t.transform.rotation.x = sr * cp * cy - cr * sp * sy
+    #         t.transform.rotation.y = cr * sp * cy + sr * sp * sy
+    #         t.transform.rotation.z = cr * cp * sy - sr * sp * cy
+
+    #         # Broadcast the static transform
+    #         self.tf_static_broadcaster.sendTransform(t)
+    #         carb.log_info(f"Published static TF: {t.header.frame_id} -> {t.child_frame_id}")
+
+
+    # gaidong 2
+
+    def add_lidar_writter(self, data):
+        import math
+
+        # List all the available writers: print(rep.writers.WriterRegistry._writers)
+        render_prod_path = rep.create.render_product(data["stage_prim_path"], [1, 1], name=data["lidar_name"])
+
+        # Create the writer for the lidar
+        writer_pc = rep.writers.get("RtxLidarROS2PublishPointCloud")
+        writer_pc.initialize(nodeNamespace=self._namespace, topicName=data["lidar_name"] + "/pointcloud", frameId=data["lidar_name"])
+        writer_pc.attach([render_prod_path])
+
+        # Add the writer to the dictionary
+        self.graphical_sensors_writers[data["lidar_name"]] = [writer_pc]
+
+        # Create the writer for publishing a laser scan message along with the point cloud
+        writer_scan = rep.writers.get("RtxLidarROS2PublishLaserScan")
+        writer_scan.initialize(nodeNamespace=self._namespace, topicName=data["lidar_name"] + "/laserscan", frameId=data["lidar_name"])
+        writer_scan.attach([render_prod_path])
+        self.graphical_sensors_writers[data["lidar_name"]].append(writer_scan)
+
+
+        if not hasattr(self, '_lidar_offsets'):
+            self._lidar_offsets = {}
+        
+        self._lidar_offsets[data["lidar_name"]] = {
+            "position": data.get("position", [0.0, 0.0, 0.0]),
+            "orientation": data.get("orientation", [0.0, 0.0, 0.0])
+        }
+        
+        carb.log_info(f"Registered lidar for TF tracking: {data['lidar_name']}")
+
 
 
     def update_state(self, state):
@@ -513,6 +613,41 @@ class ROS2MultiRotorBackend(Backend):
             t.transform.rotation.z = state.attitude[2]
             t.transform.rotation.w = state.attitude[3]
             self.tf_broadcaster.sendTransform(t)
+
+
+            # B. 发布所有雷达的动态变换: base_link -> lidar_X
+            # 只有在 add_lidar_writter 中注册过雷达后才会执行
+            if hasattr(self, '_lidar_offsets'):
+                import math
+                for lidar_name, offset in self._lidar_offsets.items():
+                    l = TransformStamped()
+                    l.header.stamp = pose.header.stamp # 强制与点云数据时间戳同步
+                    l.header.frame_id = self._namespace + '_' + 'base_link'
+                    l.child_frame_id = lidar_name
+                    
+                    # 设置从字典读取的安装位置偏移
+                    pos = offset["position"]
+                    l.transform.translation.x = float(pos[0])
+                    l.transform.translation.y = float(pos[1])
+                    l.transform.translation.z = float(pos[2])
+                    
+                    # 转换安装旋转角度 (Euler degrees -> Quaternion)
+                    ori = offset["orientation"]
+                    roll, pitch, yaw = [math.radians(x) for x in ori]
+                    
+                    cy = math.cos(yaw * 0.5)
+                    sy = math.sin(yaw * 0.5)
+                    cp = math.cos(pitch * 0.5)
+                    sp = math.sin(pitch * 0.5)
+                    cr = math.cos(roll * 0.5)
+                    sr = math.sin(roll * 0.5)
+
+                    l.transform.rotation.w = cr * cp * cy + sr * sp * sy
+                    l.transform.rotation.x = sr * cp * cy - cr * sp * sy
+                    l.transform.rotation.y = cr * sp * cy + sr * sp * sy
+                    l.transform.rotation.z = cr * cp * sy - sr * sp * cy
+                    
+                    self.tf_broadcaster.sendTransform(l)
         
 
     def input_reference(self):

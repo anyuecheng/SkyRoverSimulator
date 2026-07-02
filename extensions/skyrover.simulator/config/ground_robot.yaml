@@ -3,7 +3,7 @@
 
 # vehicle config
 stage_prefix: hunter_se_description
-usd_file: /mnt/disk6_1/fei/SkyRoverSimulator/extensions/skyrover.simulator/skyrover/simulator/assets/Robots/hunter_se/hunter_se_ctrl.usd
+usd_file: /mnt/disk6t1/fei/SkyRoverSimulator/extensions/skyrover.simulator/skyrover/simulator/assets/Robots/hunter_se/hunter_se_ctrl.usd
 
 use_imu: true
 use_gps: true
