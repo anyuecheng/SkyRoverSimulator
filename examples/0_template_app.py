@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """
 | File: 0_template_app.py
-| Author: Marcelo Jacinto (marcelo.jacinto@tecnico.ulisboa.pt)
-| License: BSD-3-Clause. Copyright (c) 2023, Marcelo Jacinto. All rights reserved.
+| Author: Fei Wang (feiwang@dlmu.edu.cn)
+| License: BSD-3-Clause. Copyright (c) 2025, Fei Wang. All rights reserved.
 | Description: This files serves as a template on how to build a clean and simple Isaac Sim based standalone App.
 """
 

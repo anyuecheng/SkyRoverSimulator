@@ -203,7 +203,7 @@ class PX4MavlinkBackendConfig(BackendConfig):
             >>>  "connection_ip": "localhost",
             >>>  "connection_baseport": 4560,
             >>>  "px4_autolaunch": True,
-            >>>  "px4_dir": "PegasusInterface().px4_path",
+            >>>  "px4_dir": "SkyRoverInterface().px4_path",
             >>>  "px4_vehicle_model": "gazebo-classic_iris",
             >>>  "enable_lockstep": True,
             >>>  "num_rotors": 4,
@@ -221,7 +221,7 @@ class PX4MavlinkBackendConfig(BackendConfig):
 
         # Configure whether to launch px4 in the background automatically or not for every vehicle launched
         # self.px4_autolaunch: bool = self.config.get("px4_autolaunch", True)
-        # self.px4_dir: str = self.config.get("px4_dir", PegasusInterface().px4_path)
+        # self.px4_dir: str = self.config.get("px4_dir", SkyRoverInterface().px4_path)
         # self.px4_vehicle_model: str = self.config.get("px4_vehicle_model", "gazebo-classic_iris")
 
         # Configurations to interpret the rotors control messages coming from mavlink

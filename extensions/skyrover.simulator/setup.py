@@ -68,7 +68,7 @@ class PatchIsaacSimKitApp(egg_info):
         # Check if the ISAACSIM_PATH environment variable is set
         if not isaacsim_path:
             # If the environment variable is not set, raise an error
-            raise RuntimeError("ISAACSIM_PATH is not set! Please set it to the path of your Isaac Sim installation. Read the installation instructions at https://pegasussimulator.github.io/PegasusSimulator/source/setup/installation.html")
+            raise RuntimeError("ISAACSIM_PATH is not set! Please set it to the path of your Isaac Sim installation.")
 
         # Check if the isaacsim.exp.base.kit file contains the "isaacsim.replicator.agent.core" extension
         isaac_sim_kit_app = os.path.join(isaacsim_path, "apps", "isaacsim.exp.base.kit")
@@ -83,10 +83,7 @@ setup(
     author="Fei Wang",
     maintainer="Fei Wang",
     maintainer_email="feiwang@dlmu.edu.cn",
-    # url="https://github.com/PegasusSimulator/PegasusSimulator/tree/main/extensions/pegasus.simulator",
     version="0.1.0",
-    # description="Extension providing the main framework interfaces for simulating aerial vehicles using PX4, Python or ROS 2 as a backend",
-    # keywords=["drone", "quadrotor", "multirotor", "UAV", "px4", "sitl", "robotics"],
     license="BSD-3-Clause",
     include_package_data=True,
     python_requires=">=3.7",

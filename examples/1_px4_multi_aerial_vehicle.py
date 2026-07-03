@@ -20,7 +20,7 @@ simulation_app = SimulationApp({"headless": True})
 import omni.timeline
 from omni.isaac.core.world import World
 
-# Import the Pegasus API for simulating drones
+# Import the SkyRover API for simulating robots
 from skyrover.simulator.impl.params import AERIAL_ROBOTS, SIMULATION_ENVIRONMENTS
 from skyrover.simulator.core.state import State
 from skyrover.simulator.core.backends.px4_mavlink_backend import PX4MavlinkBackend, PX4MavlinkBackendConfig
@@ -39,13 +39,13 @@ class SkyApp:
 
     def __init__(self):
         """
-        Method that initializes the PegasusApp and is used to setup the simulation environment.
+        Method that initializes the SkyApp and is used to setup the simulation environment.
         """
 
         # Acquire the timeline that will be used to start/stop the simulation
         self.timeline = omni.timeline.get_timeline_interface()
 
-        # Start the Pegasus Interface
+        # Start the SkyRover Interface
         self.sk = SkyRoverInterface()
 
         # Acquire the World, .i.e, the singleton that controls that is a one stop shop for setting up physics,
@@ -118,7 +118,7 @@ class SkyApp:
             self.world.step(render=True)
 
         # Cleanup and stop
-        carb.log_warn("PegasusApp Simulation App is closing.")
+        carb.log_warn("SkyApp Simulation App is closing.")
         self.timeline.stop()
         simulation_app.close()
 

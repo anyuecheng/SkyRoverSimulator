@@ -84,11 +84,11 @@ class UIHandler:
 
 #         # Atributes to store the path for the Px4 directory
 #         self._px4_directory_field: ui.AbstractValueModel = None
-#         self._px4_dir: str = PegasusInterface().px4_path
+#         self._px4_dir: str = SkyRoverInterface().px4_path
 
 #         # Atributes to store the PX4 airframe
 #         self._px4_airframe_field: ui.AbstractValueModel = None
-#         self._px4_airframe: str = self._pegasus_sim.px4_default_airframe
+#         self._px4_airframe: str = self._skyrover_sim.px4_default_airframe
 
 #         # Attribute that will save the model for the ardupilot-autostart checkbox
 #         self._ardupilot_autostart_checkbox: ui.AbstractValueModel = None
@@ -96,11 +96,11 @@ class UIHandler:
 
 #         # Atributes to store the path for the ArduPilot directory
 #         self._ardupilot_directory_field: ui.AbstractValueModel = None
-#         self._ardupilot_dir: str = PegasusInterface().ardupilot_path
+#         self._ardupilot_dir: str = SkyRoverInterface().ardupilot_path
 
 #         # Atributes to store the ArduPilot airframe
 #         self._ardupilot_airframe_field: ui.AbstractValueModel = None
-#         self._ardupilot_airframe: str = self._pegasus_sim.ardupilot_default_airframe
+#         self._ardupilot_airframe: str = self._skyrover_sim.ardupilot_default_airframe
 
     def set_window_bind(self, window):
         self._window = window
@@ -393,15 +393,15 @@ class UIHandler:
 #         # Read the current path from the field
 #         path = self._px4_directory_field.get_value_as_string()
 
-#         # Set the path using the pegasus interface
-#         self._pegasus_sim.set_px4_path(path)
+#         # Set the path using the skyrover interface
+#         self._skyrover_sim.set_px4_path(path)
 
 #     def on_reset_px4_path(self):
 #         """
 #         Method that will reset the string field to the default PX4 path
 #         """
 #         carb.log_warn("Reseting the path to the default one")
-#         self._px4_directory_field.set_value(self._pegasus_sim.px4_path)
+#         self._px4_directory_field.set_value(self._skyrover_sim.px4_path)
 
 #     def on_set_new_default_ardupilot_path(self):
 #         """
@@ -412,12 +412,12 @@ class UIHandler:
 #         # Read the current path from the field
 #         path = self._ardupilot_directory_field.get_value_as_string()
 
-#         # Set the path using the pegasus interface
-#         self._pegasus_sim.set_ardupilot_path(path)
+#         # Set the path using the skyrover interface
+#         self._skyrover_sim.set_ardupilot_path(path)
 
 #     def on_reset_ardupilot_path(self):
 #         """
 #         Method that will reset the string field to the default ArduPilot path
 #         """
 #         carb.log_warn("Reseting the path to the default one")
-#         self._ardupilot_directory_field.set_value(self._pegasus_sim.ardupilot_path)
+#         self._ardupilot_directory_field.set_value(self._skyrover_sim.ardupilot_path)

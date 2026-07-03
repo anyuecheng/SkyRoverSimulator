@@ -1,5 +1,5 @@
 """
-| File: pegasus_interface.py
+| File: skyrover_interface.py
 | Author: Fei Wang (feiwang@dlmu.edu.cn)
 | License: BSD-3-Clause. Copyright (c) 2025, Fei Wang. All rights reserved.
 """
@@ -20,7 +20,7 @@ from isaacsim.core.utils.stage import clear_stage, create_new_stage_async, updat
 from isaacsim.core.utils.viewports import set_camera_view
 import isaacsim.storage.native as nucleus
 
-# Pegasus Simulator internal API
+# SkyRover Simulator internal API
 from skyrover.simulator.impl.params import DEFAULT_WORLD_SETTINGS, SIMULATION_ENVIRONMENTS, CONFIG_FILE
 from skyrover.simulator.core.vehicle_manager import VehicleManager
 
@@ -563,7 +563,7 @@ class SkyRoverInterface:
 
     def set_default_global_coordinates(self):
         """
-        Method that sets the latitude, longitude and altitude from the pegasus interface to the 
+        Method that sets the latitude, longitude and altitude from the skyrover interface to the 
         default global coordinates specified in the extension configuration file
         """
         self._latitude, self._longitude, self._altitude = self._get_global_coordinates_from_config()

@@ -11,9 +11,6 @@ from omni.isaac.dynamic_control import _dynamic_control
 # The vehicle interface
 from skyrover.simulator.core.vehicles.vehicle import Vehicle
 
-# Mavlink interface
-# from pegasus.simulator.logic.backends.px4_mavlink_backend import PX4MavlinkBackend, PX4MavlinkBackendConfig
-
 from skyrover.simulator.core.config_yaml import ConfigYaml
 from skyrover.simulator.impl.params import AERIAL_ROBOT_CONFIG
 

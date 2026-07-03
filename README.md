@@ -1,96 +1,208 @@
-# Pegasus Simulator
+# SkyRover Simulator
 
 ![IsaacSim 4.5.0](https://img.shields.io/badge/IsaacSim-4.5.0-brightgreen.svg)
 ![PX4-Autopilot 1.14.3](https://img.shields.io/badge/PX4--Autopilot-1.14.3-brightgreen.svg)
-![ArduPilot-Copter 4.4](https://img.shields.io/badge/ArduPilot--Copter-4.4.0-brightgreen.svg)
 ![Ubuntu 22.04](https://img.shields.io/badge/Ubuntu-22.04LTS-brightgreen.svg)
-[![](https://dcbadge.limes.pink/api/server/[INVITE](https://discord.gg/AjCxw2QUmt?style=flat))](https://discord.gg/AjCxw2QUmt)
 
-**Pegasus Simulator** is a framework built on top of [NVIDIA Omniverse](https://docs.omniverse.nvidia.com/) and [IsaacSim](https://docs.omniverse.nvidia.com/app_isaacsim/app_isaacsim/overview.html). It is designed to provide an easy yet powerful way of simulating the dynamics of vehicles. It provides a simulation interface for [PX4](https://px4.io/) and [ArduPilot](https://ardupilot.org/) integration, as well as a custom python control interface. At the moment, only multirotor vehicles are supported, with support for other vehicle topologies planned for future versions.
+**SkyRover Simulator** 是一个基于 [NVIDIA Omniverse](https://docs.omniverse.nvidia.com/) 和 [IsaacSim](https://docs.omniverse.nvidia.com/app_isaacsim/app_isaacsim/overview.html) 构建的仿真框架。该项目基于开源项目 [Pegasus Simulator](https://github.com/PegasusSimulator/PegasusSimulator) 改编而来，专注于提供空地协同机器人的仿真能力。它为空中多旋翼飞行器和地面移动机器人提供了易用且强大的动力学仿真接口，支持 [PX4](https://px4.io/) 飞控集成以及 ROS 2 控制接口。
 
-<p align = "center">
-<a href="https://youtu.be/_11OCFwf_GE" target="_blank"><img src="docs/_static/pegasus_cover.png" alt="Pegasus Simulator image" height="300"/></a>
-<a href="https://youtu.be/_11OCFwf_GE" target="_blank"><img src="docs/_static/mini demo.gif" alt="Pegasus Simulator gif" height="300"/></a>
-</p>
+## 主要特性
 
-Check the provided documentation [here](https://pegasussimulator.github.io/PegasusSimulator/) to discover how to install and use this framework.
+### 支持的机器人类型
+- **多旋翼飞行器 (Multirotor Aerial Vehicles)**: 支持基于 PX4 Mavlink 和 ROS 2 的四旋翼无人机仿真
+- **地面移动机器人 (Ground Vehicles)**: 支持基于 ROS 2 的地面机器人仿真
+- **空地协同**: 能够同时仿真多个空中和地面机器人，适用于空地协同任务研究
 
-## Latest Updates
-* **2025-07-20**: Pegasus Simulator v4.5.0 is released for Isaac 4.5.0. This version is **NOT** compatible with older versions of Isaac Sim. The Ardupilot experimental interface was not tested in this version.
-* **2024-11-01**: Pegasus Simulator v4.2.0 is released for Isaac 4.2.0. This version is **NOT** compatible with older versions of Isaac Sim. This version includes a new experimental interface for Ardupilot integration, provided by open-source contributor [Tomer Tiplitsky](https://github.com/TomerTip).
-* **2024-08-02**: Pegasus Simulator v4.1.0 is released for Isaac 4.1.0. This version is **NOT** compatible with older versions of Isaac Sim.
+### 控制后端
+- **PX4 Mavlink Backend**: 完整的 PX4 SITL (Software-In-The-Loop) 集成，支持标准的 MAVLink 通信协议
+- **ROS 2 Backend**: 原生支持 ROS 2 接口，便于与 ROS 2 生态系统集成
+- **多后端支持**: 单个机器人可同时启用多个控制后端（如 PX4 + ROS 2）
 
-## Citation
+### 传感器系统
+- **惯性测量单元 (IMU)**: 加速度计和陀螺仪仿真
+- **GPS**: 全球定位系统仿真
+- **磁力计 (Magnetometer)**: 地磁场传感器仿真
+- **气压计 (Barometer)**: 大气压力传感器仿真
+- **视觉传感器**: 单目相机和激光雷达 (LiDAR) 支持
 
-If you find Pegasus Simulator useful in your academic work, please cite the paper below. It is also available [here](https://doi.org/10.1109/ICUAS60882.2024.10556959).
+### 动力学模型
+- **推力曲线模型**: 二次推力曲线仿真
+- **空气阻力模型**: 线性和非线性阻力仿真
+- **完整的刚体动力学**: 基于 Isaac Sim 的物理引擎
+
+## 项目结构
+
+```
+SkyRoverSimulator/
+├── examples/                      # 示例脚本
+│   ├── 1_px4_multi_aerial_vehicle.py
+│   ├── 2_ros2_ground_vehicle.py
+│   ├── 3_px4_single_aerial_vehicle.py
+│   └── 4_px4_single_aerial_vehicle_with_power.py
+├── extensions/
+│   └── skyrover.simulator/        # 核心扩展
+│       ├── skyrover/
+│       │   └── simulator/
+│       │       ├── core/          # 核心模块
+│       │       │   ├── backends/  # 控制后端 (PX4, ROS2)
+│       │       │   ├── sensors/   # 传感器模块
+│       │       │   ├── graphical_sensors/  # 图形传感器
+│       │       │   ├── dynamics/  # 动力学模型
+│       │       │   ├── thrusters/ # 推进器模型
+│       │       │   ├── vehicles/  # 机器人模型
+│       │       │   └── interface/ # SkyRover 接口
+│       │       └── impl/          # 实现细节
+│       └── config/                # 配置文件
+└── docs/                          # 文档
+
+```
+
+## 快速开始
+
+### 环境要求
+
+- **操作系统**: Ubuntu 22.04 LTS
+- **Isaac Sim**: 4.5.0
+- **Python**: 3.7+
+- **PX4-Autopilot**: 1.14.3 (如果使用 PX4 后端)
+- **ROS 2**: Humble 或更高版本 (如果使用 ROS 2 后端)
+
+### 安装
+
+1. 安装 NVIDIA Isaac Sim 4.5.0
+
+2. 设置环境变量:
+```bash
+export ISAACSIM_PATH="path/to/isaac_sim"
+```
+
+3. 安装 SkyRover Simulator 扩展:
+```bash
+cd extensions/skyrover.simulator
+python setup.py install
+```
+
+### 运行示例
+
+#### 示例 1: PX4 多机仿真
+```bash
+python examples/1_px4_multi_aerial_vehicle.py
+```
+该示例启动 3 架配备 PX4 Mavlink 后端的四旋翼无人机。
+
+#### 示例 2: ROS 2 地面机器人
+```bash
+python examples/2_ros2_ground_vehicle.py
+```
+该示例启动一个基于 ROS 2 控制的地面移动机器人。
+
+#### 示例 3: PX4 单机仿真（含 ROS 2）
+```bash
+python examples/3_px4_single_aerial_vehicle.py
+```
+该示例启动一架同时配备 PX4 Mavlink 和 ROS 2 后端的四旋翼无人机。
+
+## 核心组件
+
+### SkyRoverInterface
+主接口类，用于管理仿真环境和机器人实例:
+```python
+from skyrover.simulator.core.interface.skyrover_interface import SkyRoverInterface
+
+sk = SkyRoverInterface()
+sk.load_environment(SIMULATION_ENVIRONMENTS["Curved Gridroom"])
+```
+
+### 多旋翼飞行器 (MultirotorAerial)
+配置和生成空中多旋翼机器人:
+```python
+from skyrover.simulator.core.vehicles.multirotor_aerial import MultirotorAerial, MultirotorAerialConfig
+from skyrover.simulator.core.backends.px4_mavlink_backend import PX4MavlinkBackend
+
+config = MultirotorAerialConfig()
+config.backends = [PX4MavlinkBackend(PX4MavlinkBackendConfig(0))]
+
+MultirotorAerial(
+    "/World/quadrotor",
+    AERIAL_ROBOTS['Iris'],
+    vehicle_id=0,
+    init_pos=[0.0, 0.0, 0.07],
+    init_orientation=[0.0, 0.0, 0.0, 1.0],
+    config=config
+)
+```
+
+### 地面机器人 (MultirotorGround)
+配置和生成地面移动机器人:
+```python
+from skyrover.simulator.core.vehicles.multirotor_ground import MultirotorGround, MultirotorGroundConfig
+from skyrover.simulator.core.backends.ros2_multirotor_backend import ROS2MultiRotorBackend
+
+config = MultirotorGroundConfig()
+config.backends = [ROS2MultiRotorBackend(vehicle_id=0, config=ROS2MultiRotorGroundBackendConfig())]
+
+MultirotorGround(
+    "/World/Root",
+    GROUND_ROBOTS['ground'],
+    vehicle_id=0,
+    init_pos=[0.0, 0.0, 5.0],
+    init_orientation=[0.0, 0.0, 0.0, 1.0],
+    config=config
+)
+```
+
+## 配置
+
+项目使用 YAML 配置文件来定义机器人参数和仿真环境:
+
+- `extensions/skyrover.simulator/config/aerial_robot.yaml`: 空中机器人配置
+- `extensions/skyrover.simulator/config/ground_robot.yaml`: 地面机器人配置
+- `extensions/skyrover.simulator/config/configs.yaml`: 全局配置
+
+## 致谢
+
+SkyRover Simulator 基于开源项目 [Pegasus Simulator](https://github.com/PegasusSimulator/PegasusSimulator) 改编而来。感谢 Pegasus Simulator 团队为社区提供的优秀基础框架。
+
+**Pegasus Simulator 原作者**:
+- [Marcelo Jacinto](https://github.com/MarceloJacinto) - 项目创始人和主要开发者
+- [João Pinto](https://github.com/jschpinto) - 架构和示例应用
+
+**相关引用**:
 ```
 @INPROCEEDINGS{10556959,
   author={Jacinto, Marcelo and Pinto, João and Patrikar, Jay and Keller, John and Cunha, Rita and Scherer, Sebastian and Pascoal, António},
   booktitle={2024 International Conference on Unmanned Aircraft Systems (ICUAS)}, 
   title={Pegasus Simulator: An Isaac Sim Framework for Multiple Aerial Vehicles Simulation}, 
   year={2024},
-  volume={},
-  number={},
   pages={917-922},
-  keywords={Simulation;Robot sensing systems;Real-time systems;Sensor systems;Sensors;Task analysis},
-  doi={10.1109/ICUAS60882.2024.10556959}}
+  doi={10.1109/ICUAS60882.2024.10556959}
+}
 ```
 
-## Main Developer Team
+## 开发团队
 
-This simulation framework is an open-source effort, started by me, Marcelo Jacinto in January/2023. It is a tool that was created with the original purpose of serving my Ph.D. workplan for the next 4 years, which means that you can expect this repository to be mantained, hopefully at least until 2027.
+**SkyRover Simulator**:
+- **项目负责人**: Fei Wang (feiwang@dlmu.edu.cn)
+- **单位**: 大连海事大学 (Dalian Maritime University)
 
-* Project Founder
-	* [Marcelo Jacinto](https://github.com/MarceloJacinto), under the supervision of <u>Prof. Rita Cunha</u> and <u>Prof. Antonio Pascoal</u> (IST/ISR-Lisbon)
-* Architecture
-  * [Marcelo Jacinto](https://github.com/MarceloJacinto)
-  * [João Pinto](https://github.com/jschpinto)
-* Multirotor Dynamic Simulation and Control
-  * [Marcelo Jacinto](https://github.com/MarceloJacinto)
-* Example Applications
-	* [Marcelo Jacinto](https://github.com/MarceloJacinto)
-	* [João Pinto](https://github.com/jschpinto)
-* Ardupilot Integration (Experimental)
-  * [Tomer Tiplitsky](https://github.com/TomerTip)
-  * [Tanner Gilbert](https://github.com/TannerGilbert)
+## 许可证
 
-Also check the always up-to-date [Github contributors list](https://github.com/PegasusSimulator/PegasusSimulator/graphs/contributors) with all the open-source contributors.
+SkyRover Simulator 基于 [BSD-3-Clause License](LICENSE) 发布。
 
-## Guidance, Control and Navigation Project
+依赖项和资源的许可证文件位于 `docs/licenses` 目录中。
 
-In parallel to this project, the Pegasus (GNC) guidance, control, and navigation project serves as the foundation control code for performing real-world experiments for my Ph.D. More information can be found at this link:
-[Pegasus GNC](https://pegasusresearch.github.io/pegasus/)
+- NVIDIA Isaac Sim 根据 [个人许可证](https://www.nvidia.com/en-us/omniverse/download/) 免费提供
+- PX4-Autopilot 是一个开源项目，采用 [BSD-3 License](https://github.com/PX4/PX4-Autopilot)
 
-## Project Roadmap
+## 贡献
 
-An high level project roadmap is available [here](https://pegasussimulator.github.io/PegasusSimulator/source/references/roadmap.html).
+欢迎社区贡献来改进本项目。如有问题、建议或功能请求，请通过以下方式参与:
 
-## Support and Contributing
+- 使用 [Issues](../../issues) 跟踪开发工作、bug 和文档问题
+- 使用 [Pull Requests](../../pulls) 修复 bug 或贡献代码、示例或改进文档
 
-We welcome new contributions from the community to improve this work. Please check the [Contributing](https://pegasussimulator.github.io/PegasusSimulator/source/references/contributing.html) section in the documentation for the guidelines on how to help improve and support this project.
+## 项目赞助
 
-* Use [Discussions](https://github.com/PegasusSimulator/PegasusSimulator/discussions) for discussing ideas, asking questions, and requests features.
-* Use [Issues](https://github.com/PegasusSimulator/PegasusSimulator/issues) to track work in development, bugs and documentation issues.
-* Use [Pull Requests](https://github.com/PegasusSimulator/PegasusSimulator/pulls) to fix bugs or contribute directly with your own ideas, code, examples or improve documentation.
+- 大连海事大学 (Dalian Maritime University)
 
-## Licenses
-
-Pegasus Simulator is released under [BSD-3 License](LICENSE). The license files of its dependencies and assets are present in the [`docs/licenses`](docs/licenses) directory.
-
-NVIDIA Isaac Sim is available freely under [individual license](https://www.nvidia.com/en-us/omniverse/download/). 
-
-PX4-Autopilot is available as an open-source project under [BSD-3 License](https://github.com/PX4/PX4-Autopilot).
-
-## Project Sponsors
-- Dynamics Systems and Ocean Robotics (DSOR) group of the Institute for Systems and Robotics (ISR), a research unit of the Laboratory of Robotics and Engineering Systems (LARSyS).
-- Instituto Superior Técnico, Universidade de Lisboa
-
-The work developed by Marcelo Jacinto and João Pinto was supported by Ph.D. grants funded by Fundação para a Ciência e Tecnologia (FCT).
-
-<p float="left" align="center">
-  <img src="docs/_static/dsor_logo.png" width="90" align="center" />
-  <img src="docs/_static/logo_isr.png" width="200" align="center"/> 
-  <img src="docs/_static/larsys_logo.png" width="200" align="center"/> 
-  <img src="docs/_static/ist_logo.png" width="200" align="center"/> 
-  <img src="docs/_static/logo_fct.png" width="200" align="center"/> 
-</p>
+---

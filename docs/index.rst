@@ -1,23 +1,50 @@
-Pegasus Simulator
-#################
+SkyRover Simulator
+##################
 
-Overview
+概述
+====
+
+**SkyRover Simulator** 是一个基于 `NVIDIA Omniverse <https://docs.omniverse.nvidia.com/>`__ 和 `Isaac Sim <https://docs.omniverse.nvidia.com/app_isaacsim/app_isaacsim/overview.html>`__ 构建的仿真框架。该项目基于开源项目 `Pegasus Simulator <https://github.com/PegasusSimulator/PegasusSimulator>`__ 改编而来，专注于提供空地协同机器人的仿真能力。它为空中多旋翼飞行器和地面移动机器人提供了易用且强大的动力学仿真接口，支持 `PX4 <https://px4.io/>`__ 飞控集成以及 ROS 2 控制接口。
+
+主要特性
 ========
 
-**Pegasus Simulator** is a framework built on top of `NVIDIA
-Omniverse <https://docs.omniverse.nvidia.com/>`__ and `Isaac
-Sim <https://docs.omniverse.nvidia.com/app_isaacsim/app_isaacsim/overview.html>`__. It is designed to provide an easy yet
-powerful way of simulating the dynamics of multirotors vehicles. It provides a simulation interface for `PX4 <https://px4.io/>`__
-integration as well as custom python control interface. At the moment, only multirotor vehicles are supported, with support for other vehicle topologies planned for future versions.
+支持的机器人类型
+~~~~~~~~~~~~~~~~
+- **多旋翼飞行器 (Multirotor Aerial Vehicles)**: 支持基于 PX4 Mavlink 和 ROS 2 的四旋翼无人机仿真
+- **地面移动机器人 (Ground Vehicles)**: 支持基于 ROS 2 的地面机器人仿真
+- **空地协同**: 能够同时仿真多个空中和地面机器人，适用于空地协同任务研究
 
-.. raw:: html
+控制后端
+~~~~~~~~
+- **PX4 Mavlink Backend**: 完整的 PX4 SITL (Software-In-The-Loop) 集成，支持标准的 MAVLink 通信协议
+- **ROS 2 Backend**: 原生支持 ROS 2 接口，便于与 ROS 2 生态系统集成
+- **多后端支持**: 单个机器人可同时启用多个控制后端（如 PX4 + ROS 2）
 
-   <p align = "center">
-   <a href="https://youtu.be/_11OCFwf_GE" target="_blank"><img src="_static/pegasus_cover.png" alt="Pegasus Simulator image" align="center" height="50"/></a>
-   <a href="https://youtu.be/_11OCFwf_GE" target="_blank"><img src="_static/mini demo.gif" alt="Pegasus Simulator gif" align="center" height="50"/></a>
-   </p>
+传感器系统
+~~~~~~~~~~
+- **惯性测量单元 (IMU)**: 加速度计和陀螺仪仿真
+- **GPS**: 全球定位系统仿真
+- **磁力计 (Magnetometer)**: 地磁场传感器仿真
+- **气压计 (Barometer)**: 大气压力传感器仿真
+- **视觉传感器**: 单目相机和激光雷达 (LiDAR) 支持
 
-If you find ``Pegasus Simulator`` useful in your academic work, please cite the paper below. It is also available `here <https://doi.org/10.1109/ICUAS60882.2024.10556959>`_.
+动力学模型
+~~~~~~~~~~
+- **推力曲线模型**: 二次推力曲线仿真
+- **空气阻力模型**: 线性和非线性阻力仿真
+- **完整的刚体动力学**: 基于 Isaac Sim 的物理引擎
+
+致谢
+====
+
+SkyRover Simulator 基于开源项目 `Pegasus Simulator <https://github.com/PegasusSimulator/PegasusSimulator>`__ 改编而来。感谢 Pegasus Simulator 团队为社区提供的优秀基础框架。
+
+**Pegasus Simulator 原作者**:
+- `Marcelo Jacinto <https://github.com/MarceloJacinto>`__ - 项目创始人和主要开发者
+- `João Pinto <https://github.com/jschpinto>`__ - 架构和示例应用
+
+**相关引用**:
 
 .. code-block:: bibtex
 
@@ -26,122 +53,50 @@ If you find ``Pegasus Simulator`` useful in your academic work, please cite the 
       booktitle={2024 International Conference on Unmanned Aircraft Systems (ICUAS)}, 
       title={Pegasus Simulator: An Isaac Sim Framework for Multiple Aerial Vehicles Simulation}, 
       year={2024},
-      volume={},
-      number={},
       pages={917-922},
-      keywords={Simulation;Robot sensing systems;Real-time systems;Sensor systems;Sensors;Task analysis},
-      doi={10.1109/ICUAS60882.2024.10556959}}
+      doi={10.1109/ICUAS60882.2024.10556959}
+   }
 
-Latest Updates
-==============
-* **2025-07-20**: Pegasus Simulator v4.5.0 is released for Isaac 4.5.0. This version is **NOT** compatible with older versions of Isaac Sim. The Ardupilot experimental interface was not tested in this version.
-* **2024-11-01**: Pegasus Simulator v4.2.0 is released for Isaac 4.2.0. This version is **NOT** compatible with older versions of Isaac Sim. This version includes a new experimental interface for Ardupilot integration, provided by open-source contributor `Tomer Tiplitsky <https://github.com/TomerTip>`__.
-* **2024-08-02**: Pegasus Simulator v4.1.0 is released for Isaac 4.1.0. This version is **NOT** compatible with older versions of Isaac Sim.
+开发团队
+========
 
-Guidance, Control and Navigation Project
-========================================
+**SkyRover Simulator**:
+- **项目负责人**: Fei Wang (feiwang@dlmu.edu.cn)
+- **单位**: 大连海事大学 (Dalian Maritime University)
 
-In parallel to this project, the Pegasus (GNC) guidance, control, and navigation project serves as the foundation control code for performing real-world experiments for my Ph.D. More information can be found at this link:
-`Pegasus GNC <https://pegasusresearch.github.io/pegasus/>`__.
+项目赞助
+========
 
-Developer Team
-~~~~~~~~~~~~~~
+- 大连海事大学 (Dalian Maritime University)
 
-This simulation framework is an open-source effort, started by me, Marcelo Jacinto in January/2023. It is a tool that was created with the original purpose of serving my Ph.D. workplan for the next 4 years, which means that you can expect this repository to be mantained, hopefully at least until 2027.
+其他仿真框架
+============
 
-- Project Founder
-   - `Marcelo Jacinto <https://github.com/MarceloJacinto>`__, under the supervision of Prof. Rita Cunha and Prof. Antonio Pascoal (IST/ISR-Lisbon)
-- Architecture
-   - `Marcelo Jacinto <https://github.com/MarceloJacinto>`__
-   - `João Pinto <https://github.com/jschpinto>`__
-- Multirotor Dynamic Simulation and Control
-   - `Marcelo Jacinto <https://github.com/MarceloJacinto>`__
-- Example Applications
-   - `Marcelo Jacinto <https://github.com/MarceloJacinto>`__
-   - `João Pinto <https://github.com/jschpinto>`__
-- Ardupilot Integration (Experimental)
-   - `Tomer Tiplitsky <https://github.com/TomerTip>`__
-   - `Tanner Gilbert <https://github.com/TannerGilbert>`__
+在此我们感谢前人的杰出工作，他们为本项目提供了灵感：
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Getting Started
+- Gazebo simulator
+- RotorS simulation plugin for gazebo
+- PX4-SITL simulation plugin for gazebo
+- Microsoft Airsim project for Unreal Engine
+- Flightmare simulator for Unity
+- jMAVSim java simulator
 
-   source/setup/installation
-   source/setup/developer
+*"如果我看得更远，那是因为我站在巨人的肩膀上。"* —— 艾萨克·牛顿
 
-.. toctree::
-   :maxdepth: 1
-   :caption: Tutorials
+许可证
+======
 
-   source/tutorials/run_extension_mode
-   source/tutorials/create_standalone_application
-   source/tutorials/create_standalone_simulation
-   source/tutorials/create_custom_backend
-   source/tutorials/create_simulation_with_people
+SkyRover Simulator 基于 BSD-3-Clause License 发布。
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Features
+依赖项和资源的许可证文件位于 ``docs/licenses`` 目录中。
 
-   source/features/environments
-   source/features/vehicles
-   source/features/px4_integration
-   source/features/ardupilot
+- NVIDIA Isaac Sim 根据 `个人许可证 <https://www.nvidia.com/en-us/omniverse/download/>`__ 免费提供
+- PX4-Autopilot 是一个开源项目，采用 `BSD-3 License <https://github.com/PX4/PX4-Autopilot>`__
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Source API
-
-   source/api/index
-
-.. toctree::
-   :maxdepth: 1
-   :caption: References
-
-   source/references/contributing
-   source/references/known_issues
-   source/references/changelog
-   source/references/roadmap
-   source/references/license
-   source/references/bibliography
-
-.. automodule::"pegasus_isaac"
+.. automodule::"skyrover.simulator"
     :platform: Linux-x86_64
     :members:
     :undoc-members:
     :show-inheritance:
     :imported-members:
     :exclude-members: contextmanager
-
-Other Simulation Frameworks
-===========================
-
-In this section, we acknowledge the nobel work of those who came before us and inspired this work:
-
-- :cite:p:`gazebo` Gazebo simulator
-- :cite:p:`rotorS` RotorS simulation plugin for gazebo
-- :cite:p:`px4` PX4-SITL simulation plugin for gazebo
-- :cite:p:`airsim` Microsoft Airsim project for Unreal Engine
-- :cite:p:`flightmare` Flightmare simulator for Unity
-- :cite:p:`jmavsim` jMAVSim java simulator
-
-*"If I have seen further than others, it is by standing upon the shoulders of giants."*, Sir Isaac Newton
-
-Project Sponsors
-================
-
-- Dynamics Systems and Ocean Robotics (DSOR) group of the Institute for Systems and Robotics (ISR), a research unit of the Laboratory of Robotics and Engineering Systems (LARSyS).
-- Instituto Superior Técnico, Universidade de Lisboa
-
-The work developed by Marcelo Jacinto and João Pinto was supported by Ph.D. grants funded by Fundação para as Ciências e Tecnologias (FCT).
-
-.. raw:: html
-
-   <p float="left" align="center">
-      <img src="_static/dsor_logo.png" width="90" align="center" />
-      <img src="_static/logo_isr.png" width="200" align="center"/> 
-      <img src="_static/larsys_logo.png" width="200" align="center"/> 
-      <img src="_static/ist_logo.png" width="200" align="center"/> 
-      <img src="_static/logo_fct.png" width="200" align="center"/> 
-   </p>

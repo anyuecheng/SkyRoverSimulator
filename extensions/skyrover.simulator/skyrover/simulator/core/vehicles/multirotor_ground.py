@@ -12,9 +12,6 @@ from isaacsim.core.utils.prims import get_prim_at_path
 # The vehicle interface
 from skyrover.simulator.core.vehicles.vehicle import Vehicle, get_world_transform_xform
 
-# Mavlink interface
-# from pegasus.simulator.logic.backends.px4_mavlink_backend import PX4MavlinkBackend, PX4MavlinkBackendConfig
-
 from skyrover.simulator.core.config_yaml import ConfigYaml
 from skyrover.simulator.impl.params import GROUND_ROBOT_CONFIG
 
